@@ -53,9 +53,12 @@ template< typename T >
 class continuation
 {
 public:
-	explicit continuation( std::function< void( void ) > function ) :
-	m_function( []( const T& t ){ Q_UNUSED( t ) ; } ),m_start( function )
+	continuation() : m_function( []( const T& t ){ Q_UNUSED( t ) ; } )
 	{
+	}
+	void setStartFunction( std::function< void( void ) > function )
+	{
+		m_start = function ;
 	}
 	void then( std::function< void( const T& ) > function )
 	{
@@ -79,13 +82,12 @@ template< typename T >
 class ThreadHelper : public Thread
 {
 public:
-	ThreadHelper( std::function< T ( void ) > function ) :
-	m_function( function ),
-	m_continuation( [&](){ this->start() ; } )
+	ThreadHelper( std::function< T ( void ) > function ) :m_function( function )
 	{
 	}
 	continuation<T>& taskContinuation( void )
 	{
+		m_continuation.setStartFunction( [&](){ this->start() ; } ) ;
 		return m_continuation ;
 	}
 private:
@@ -105,9 +107,12 @@ private:
 class continuation_1
 {
 public:
-	explicit continuation_1( std::function< void( void ) > function ) :
-		m_function( [](){} ),m_start( function )
+	explicit continuation_1() : m_function( [](){} )
 	{
+	}
+	void setStartFunction( std::function< void( void ) > function )
+	{
+		m_start = function ;
 	}
 	void then( std::function< void( void ) > function )
 	{
@@ -130,13 +135,12 @@ private:
 class ThreadHelper_1 : public Thread
 {
 public:
-	ThreadHelper_1( std::function< void ( void ) > function ) :
-		m_function( function ),
-		m_continuation( [&](){ this->start() ; } )
+	ThreadHelper_1( std::function< void ( void ) > function ) : m_function( function )
 	{
 	}
 	continuation_1& taskContinuation( void )
 	{
+		m_continuation.setStartFunction( [&](){ this->start() ; } ) ;
 		return m_continuation ;
 	}
 private:

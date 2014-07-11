@@ -36,7 +36,7 @@ void example::run()
 	 * print the thread id to know we are on what thread.
 	 * We are on the original thread here.
 	 */
-	_printThreadID();
+	_printThreadID() ;
 
 	Task::run<QString>( [](){
 
@@ -49,7 +49,7 @@ void example::run()
 		/*
 		 * Do a time consuming process on a separate thread and return its result
 		 */
-		return _longRunningProcess();
+		return _longRunningProcess() ;
 
 	} ).then( []( const QString& r ){
 
@@ -67,6 +67,6 @@ void example::run()
 		/*
 		 * exit the application since we have reached the end of the demo.
 		 */
-		QCoreApplication::quit();
-	} );
+		QCoreApplication::quit() ;
+	} ) ;
 }
