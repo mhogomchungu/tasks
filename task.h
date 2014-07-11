@@ -194,6 +194,8 @@ auto _a = [](){
 	 * task _a does what task _a does here.
 	 *
 	 * This function body will run on a different thread
+	 *
+	 * Note that this function returns an argument.
 	 */
 	return 0 ;
 }
@@ -201,6 +203,8 @@ auto _a = [](){
 auto _b = []( const int& r ){
 	/*
 	 * task _b does what task _b does here.
+	 *
+	 * Note that this function requires an argument that matches the returned argument type of _a
 	 *
 	 * r is a const reference to a value returned by _a
 	 *
@@ -218,6 +222,8 @@ auto _a = [](){
 	 * task _a does what task _a does here.
 	 *
 	 * This function body will run on a different thread
+	 *
+	 * Note that this function returns no argument
 	 */
 }
 
@@ -225,8 +231,7 @@ auto _b = [](){
 	/*
 	 * task _b does what task _b does here.
 	 *
-	 * r is a const reference to a value returned by _a
-	 *
+	 * Note that this function requires no argument.
 	 * This function body will run on the original thread
 	 */
 }
