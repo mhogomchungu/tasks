@@ -44,7 +44,7 @@ void example::run()
 		 * print the thread id to know we are on what thread.
 		 * We are on a separate thread here
 		 */
-		_printThreadID();
+		_printThreadID() ;
 
 		/*
 		 * Do a time consuming process on a separate thread and return its result
@@ -56,7 +56,7 @@ void example::run()
 		/*
 		 * use the returned value by the previous task
 		 */
-		Q_UNUSED( r ) ;
+		qDebug() << r ;
 		/*
 		 * print the thread id to know we are on what thread.
 		 * We are back on the original thread and we will get here as a continuation of the task
