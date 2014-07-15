@@ -1,3 +1,5 @@
+#ifndef __EXAMPLE_H_INCLUDED__
+#define __EXAMPLE_H_INCLUDED__
 
 #include <QObject>
 
@@ -10,3 +12,5 @@ private slots:
 	void run();
 
 };
+
+#endif //__EXAMPLE_H_INCLUDED__

@@ -28,6 +28,9 @@
  * SUCH DAMAGE.
  */
 
+#ifndef __TASK_H_INCLUDED__
+#define __TASK_H_INCLUDED__
+
 #include <functional>
 #include <QThread>
 
@@ -245,3 +248,5 @@ Task::run( _a ).then( _b ) ;
 Task::exec( _a ) ;
 
 #endif
+
+#endif //__TASK_H_INCLUDED__
