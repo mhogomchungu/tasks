@@ -1,7 +1,3 @@
-
-#include <unistd.h>
-#include <sys/syscall.h>
-
 #include "task.h"
 #include "example.h"
 
@@ -9,10 +5,11 @@
 #include <QDebug>
 #include <QMetaObject>
 #include <QCoreApplication>
+#include <QThread>
 
 static void _printThreadID()
 {
-	qDebug() << "Thread id: " << syscall( SYS_gettid ) ;
+	qDebug() << "Thread id: " << QThread::currentThreadId();
 }
 
 void example::start()
