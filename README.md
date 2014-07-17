@@ -10,6 +10,6 @@ Another example for sample use cause is this API[2] followed by usage of the API
 
 [1] http://channel9.msdn.com/Blogs/Charles/Asynchronous-Programming-for-C-Developers-PPL-Tasks-and-Windows-8
 
-[2] https://github.com/mhogomchungu/zuluCrypt/blob/master/zuluMount-gui/zulumounttask.h#L61
+[2] https://github.com/mhogomchungu/zuluCrypt/blob/d0439a4e36521e42fa9392b82dcefd3224d53334/zuluMount-gui/zulumounttask.h#L61
 
-[3] https://github.com/mhogomchungu/zuluCrypt/blob/master/zuluMount-gui/mainwindow.cpp#L812
+[3] https://github.com/mhogomchungu/zuluCrypt/blob/d0439a4e36521e42fa9392b82dcefd3224d53334/zuluMount-gui/mainwindow.cpp#L812
