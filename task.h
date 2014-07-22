@@ -61,9 +61,11 @@ namespace Task
 		future() : m_function( []( const T& t ){ Q_UNUSED( t ) ; } )
 		{
 		}
-		void setStartFunction( std::function< void( void ) > function )
+		void setActions( std::function< void( void ) > start,
+				 std::function< void( void ) > cancel )
 		{
-			m_start = function ;
+			m_start = start ;
+			m_cancel= cancel ;
 		}
 		void then( std::function< void( const T& ) > function )
 		{
@@ -74,6 +76,10 @@ namespace Task
 		{
 			m_start() ;
 		}
+		void cancel()
+		{
+			m_cancel() ;
+		}
 		void run( const T& arg )
 		{
 			m_function( arg ) ;
@@ -81,18 +87,20 @@ namespace Task
 	private:
 		std::function< void( const T& ) > m_function ;
 		std::function< void( void ) > m_start ;
+		std::function< void( void ) > m_cancel ;
 	};
 
 	template< typename T >
 	class ThreadHelper : public Thread
 	{
 	public:
-		ThreadHelper( std::function< T ( void ) > function ) : m_function( function )
+		ThreadHelper( std::function< T ( void ) > function ) :m_function( function )
 		{
 		}
 		future<T>& taskContinuation( void )
 		{
-			m_future.setStartFunction( [&](){ this->start() ; } ) ;
+			m_future.setActions( [ this ](){ this->start() ; },
+					     [ this ](){ this->deleteLater() ; } ) ;
 			return m_future ;
 		}
 	private:
@@ -115,9 +123,11 @@ namespace Task
 		future_1() : m_function( [](){} )
 		{
 		}
-		void setStartFunction( std::function< void( void ) > function )
+		void setActions( std::function< void( void ) > start,
+				 std::function< void( void ) > cancel )
 		{
-			m_start = function ;
+			m_start = start ;
+			m_cancel= cancel ;
 		}
 		void then( std::function< void( void ) > function )
 		{
@@ -132,9 +142,14 @@ namespace Task
 		{
 			m_function() ;
 		}
+		void cancel()
+		{
+			m_cancel() ;
+		}
 	private:
 		std::function< void( void ) > m_function ;
 		std::function< void( void ) > m_start ;
+		std::function< void( void ) > m_cancel ;
 	};
 
 	class ThreadHelper_1 : public Thread
@@ -145,7 +160,8 @@ namespace Task
 		}
 		future_1& taskContinuation( void )
 		{
-			m_future.setStartFunction( [&](){ this->start() ; } ) ;
+			m_future.setActions( [ this ](){ this->start() ; },
+					     [ this ](){ this->deleteLater() ; } ) ;
 			return m_future ;
 		}
 	private:
@@ -186,7 +202,6 @@ namespace Task
 		Task::run( function ).start() ;
 	}
 }
-
 
 #if 0
 
