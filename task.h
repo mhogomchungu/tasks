@@ -33,6 +33,7 @@
 
 #include <functional>
 #include <QThread>
+#include <QEventLoop>
 
 namespace Task
 {
@@ -201,6 +202,26 @@ namespace Task
 	{
 		Task::run( function ).start() ;
 	}
+	static inline void await( std::function< void( void ) > function )
+	{
+		QEventLoop p ;
+
+		Task::run( function ).then( [ & ](){ p.exit() ;	} ) ;
+
+		p.exec() ;
+	}
+	template< typename T >
+	T await( std::function< T ( void ) > function )
+	{
+		QEventLoop p ;
+		T q ;
+
+		Task::run( function ).then( [ & ]( const T& r ){  q = r ; p.exit() ; } ) ;
+
+		p.exec() ;
+
+		return q ;
+	}
 }
 
 #if 0
@@ -213,8 +234,6 @@ auto _a = [](){
 	 * task _a does what task _a does here.
 	 *
 	 * This function body will run on a different thread
-	 *
-	 * Note that this function returns an argument.
 	 */
 	return 0 ;
 }
@@ -222,8 +241,6 @@ auto _a = [](){
 auto _b = []( const int& r ){
 	/*
 	 * task _b does what task _b does here.
-	 *
-	 * Note that this function requires an argument that matches the returned argument type of _a
 	 *
 	 * r is a const reference to a value returned by _a
 	 *
@@ -236,31 +253,49 @@ Task::run<int>( _a ).then( _b ) ;
 /*
  * Non templated version that does not pass around return value
  */
-auto _a = [](){
+auto _c = [](){
 	/*
 	 * task _a does what task _a does here.
 	 *
 	 * This function body will run on a different thread
-	 *
-	 * Note that this function returns no argument
 	 */
 }
 
-auto _b = [](){
+auto _d = [](){
 	/*
 	 * task _b does what task _b does here.
 	 *
-	 * Note that this function requires no argument.
+	 * r is a const reference to a value returned by _a
+	 *
 	 * This function body will run on the original thread
 	 */
 }
 
-Task::run( _a ).then( _b ) ;
+Task::run( _c ).then( _d ) ;
 
 /*
  * if no continuation
  */
-Task::exec( _a ) ;
+Task::exec( _c ) ;
+
+/*
+ * Task::await() is used to "block" the calling thread until the function returns.
+ *
+ * Its use case is to do sync programming without hanging the calling thread.
+ *
+ * example use case for it is to "block" on function in a GUI thread withough blocking the GUI thread
+ * hanging the application.
+ */
+
+/*
+ * await example when the called function return no result
+ */
+Task::await( _c ) ;
+
+/*
+ * await example when the called function return a result
+ */
+int r = Task::await<int>( _a ) ;
 
 #endif
 
