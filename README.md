@@ -8,7 +8,7 @@ It provides two sets of APIs.
 
 1. Task::run().then() API that allows async programming with continuation[4]
 
-2. Task::await() API thats gives sync programming without "hanging" the current thread[5]
+2. Task::await() API that gives sync programming without "hanging" the current thread through usage of resumable functions[5]
 
 Another example for sample use cause is this API[2] followed by usage of the API here[3]
 

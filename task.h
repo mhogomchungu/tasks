@@ -206,7 +206,7 @@ namespace Task
 	{
 		QEventLoop p ;
 
-		Task::run( function ).then( [ & ](){ p.exit() ;	} ) ;
+		Task::run( function ).then( [ & ](){ p.exit() ; } ) ;
 
 		p.exec() ;
 	}
