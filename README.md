@@ -12,10 +12,10 @@ The project provides two sets of APIs.
 
 2. Task::await() API provides async based programming without "hanging" the current thread through usage of resumable functions[5].
 
-Example use case for the Task::run().then() API can be found here[0]. Additional examples are [2] where an API is
-declared and [3] where the API is used.
+Example use case for the Task::run().then() API can be found here[0]. Additional example is [2] where an API is
+declared and [3] where the declared API is used.
 
-Example use case of the Task::await() is here[6] where a function call "blocks" waiting for a result without "hanging" the entire thread.
+Example use case of the Task::await() API is here[6] where a function call "blocks" waiting for a result without "hanging" the entire thread.
 
 [0] https://github.com/mhogomchungu/tasks/blob/master/example.cpp
 
