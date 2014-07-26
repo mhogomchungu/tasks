@@ -35,6 +35,12 @@
 #include <QThread>
 #include <QEventLoop>
 
+/*
+ *
+ * Examples on how to use the library are at the end of this file.
+ *
+ */
+
 namespace Task
 {
 	class Thread : public QThread
@@ -179,12 +185,11 @@ namespace Task
 	};
 
 	/*
-	 * This API runs two tasks,the first one will be run in a different thread and
+	 * Below APIs runs two tasks,the first one will be run in a different thread and
 	 * the second one will be run on the original thread after the completion of the
 	 * first one.
-	 *
-	 * See example at the end of this header file for a sample use case
 	 */
+
 	template< typename T >
 	future<T>& run( std::function< T ( void ) > function )
 	{
@@ -202,25 +207,46 @@ namespace Task
 	{
 		Task::run( function ).start() ;
 	}
-	static inline void await( std::function< void( void ) > function )
+
+	/*
+	 * Below APIs implements resumable functions where a function will be "blocked"
+	 * waiting for the function to return without "hanging" the current thread.
+	 *
+	 * recommending reading up on C#'s await keyword to get a sense of what is being
+	 * discussed below.
+	 */
+
+	static inline void await( Task::future_1& t )
 	{
 		QEventLoop p ;
 
-		Task::run( function ).then( [ & ](){ p.exit() ; } ) ;
+		t.then( [ & ](){ p.exit() ; } ) ;
 
 		p.exec() ;
 	}
+
+	static inline void await( std::function< void( void ) > function )
+	{
+		Task::await( Task::run( function ) ) ;
+	}
+
 	template< typename T >
-	T await( std::function< T ( void ) > function )
+	T await( Task::future<T>& t )
 	{
 		QEventLoop p ;
 		T q ;
 
-		Task::run( function ).then( [ & ]( const T& r ){  q = r ; p.exit() ; } ) ;
+		t.then( [ & ]( const T& r ){  q = r ; p.exit() ; } ) ;
 
 		p.exec() ;
 
 		return q ;
+	}
+
+	template< typename T >
+	T await( std::function< T ( void ) > function )
+	{
+		return Task::await( Task::run( function ) ) ;
 	}
 }
 
