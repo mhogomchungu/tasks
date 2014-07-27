@@ -6,11 +6,14 @@ This project is inspired by this[1] video on channel9.
 
 The project seeks to do async based programming in Qt/C++ using modern C++ with lambdas.
 
-The project provides two sets of APIs.
+The project has two sets of APIs.
 
-1. Task::run().then() API provides async based programming with continuation[4].
+1. Task::run().then()[4] API provides async based programming with continuation.
 
-2. Task::await() API provides async based programming without "hanging" the current thread through usage of resumable functions[5].
+2. Task::await()[5] API provides the first API presented in a different way.
+
+Under certain use cases,they can be used interchangeably, an in others,only one or the other can be used.Some of the problems
+the first API causes and solved by the second API are discussed in this[7] youtube video.
 
 Example use case for the Task::run().then() API can be found here[0]. Additional example is [2] where an API is
 declared and [3] where the declared API is used.
@@ -30,3 +33,5 @@ Example use case of the Task::await() API is here[6] where a function call "bloc
 [5] Disscussion about this can be found on the following link among other places: http://isocpp.org/files/papers/N3564.pdf
 
 [6] https://github.com/mhogomchungu/zuluCrypt/blob/5ecd607054d458afc7029287a2259ad3c5e7cd8a/zuluMount-gui/mainwindow.cpp#L560
+
+[7] https://www.youtube.com/watch?v=Y475RshtAHA
