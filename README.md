@@ -8,11 +8,11 @@ The project seeks to do async based programming in Qt/C++ using modern C++ with 
 
 The project has two sets of APIs.
 
-1. Task::run().then()[4] API provides async based programming with continuation.
+1. Task::run().then() API provides async based programming with continuation[4].
 
-2. Task::await()[5] API provides the first API presented in a different way.
+2. Task::await() API provides the first API presented in a different way[5].
 
-Under certain use cases,they can be used interchangeably, an in others,only one or the other can be used.Some of the problems
+Under certain use cases,they can be used interchangeably, and in others,only one or the other can be used.Some of the problems
 the first API causes and solved by the second API are discussed in this[7] youtube video.
 
 Example use case for the Task::run().then() API can be found here[0]. Additional example is [2] where an API is
