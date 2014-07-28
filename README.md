@@ -20,6 +20,8 @@ declared and [3] where the declared API is used.
 
 Example use case of the Task::await() API is here[6] where a function call "blocks" waiting for a result without "hanging" the entire GUI application.
 
+A short tutorial on task/async/await as implemented in C# can be viewed from this[8] link.
+
 [0] https://github.com/mhogomchungu/tasks/blob/master/example.cpp
 
 [1] http://channel9.msdn.com/Blogs/Charles/Asynchronous-Programming-for-C-Developers-PPL-Tasks-and-Windows-8
@@ -35,3 +37,5 @@ Example use case of the Task::await() API is here[6] where a function call "bloc
 [6] https://github.com/mhogomchungu/zuluCrypt/blob/7123e3c3a7c8c5b3b3b6958464fd92a7f780d827/zuluMount-gui/keydialog.cpp#L511
 
 [7] https://www.youtube.com/watch?v=Y475RshtAHA
+
+[8] http://www.youtube.com/watch?v=DqjIQiZ_ql4
