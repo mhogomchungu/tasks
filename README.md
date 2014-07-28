@@ -18,7 +18,7 @@ the first API causes and solved by the second API are discussed in this[7] youtu
 Example use case for the Task::run().then() API can be found here[0]. Additional example is [2] where an API is
 declared and [3] where the declared API is used.
 
-Example use case of the Task::await() API is here[6] where a function call "blocks" waiting for a result without "hanging" the entire thread.
+Example use case of the Task::await() API is here[6] where a function call "blocks" waiting for a result without "hanging" the entire GUI application.
 
 [0] https://github.com/mhogomchungu/tasks/blob/master/example.cpp
 
@@ -32,6 +32,6 @@ Example use case of the Task::await() API is here[6] where a function call "bloc
 
 [5] Disscussion about this can be found on the following link among other places: http://isocpp.org/files/papers/N3564.pdf
 
-[6] https://github.com/mhogomchungu/zuluCrypt/blob/5ecd607054d458afc7029287a2259ad3c5e7cd8a/zuluMount-gui/mainwindow.cpp#L560
+[6] https://github.com/mhogomchungu/zuluCrypt/blob/7123e3c3a7c8c5b3b3b6958464fd92a7f780d827/zuluMount-gui/keydialog.cpp#L511
 
 [7] https://www.youtube.com/watch?v=Y475RshtAHA
