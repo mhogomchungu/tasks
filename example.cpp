@@ -5,11 +5,32 @@
 #include <QDebug>
 #include <QMetaObject>
 #include <QCoreApplication>
-#include <QThread>
+
+/*
+ * Two examples are shown here,Example 1 and example 2.
+ *
+ * Explanation of example 1.
+ * You can think of Task::run().then() as registering an event for two tasks to be performed in sequence.
+ * The first task will be performed and on completion,the second task will be started with the result
+ * of the first task.
+ *
+ * The first task will run on a separate thread and the second one will run on the original thread.
+ *
+ * The rest of the method will be free to continue independently of the registered tasks.
+ *
+ * Explanation of example 2.
+ *
+ * You can think of Task::await() as "suspending" the execution of the method until the result of the task is returned.
+ * The suspension is done without blocking the thread and hence the suspension can happen on the GUI thread
+ * and the GUI will not hang as a result of it.
+ *
+ * The net result of example 1 and example 2 are the same.Which one to use depend on your usecase.
+ *
+ */
 
 static void _printThreadID()
 {
-	qDebug() << "Thread id: " << QThread::currentThreadId();
+	qDebug() << "Thread id: " << QThread::currentThreadId() ;
 }
 
 void example::start()
@@ -17,10 +38,15 @@ void example::start()
 	QMetaObject::invokeMethod( this,"run",Qt::QueuedConnection ) ;
 }
 
-static QString _longRunningProcess()
+auto _longRunningTask = []()
 {
 	return "abc" ;
-}
+} ;
+
+/*
+ * Example 1
+ */
+#if 1
 
 void example::run()
 {
@@ -46,7 +72,7 @@ void example::run()
 		/*
 		 * Do a time consuming process on a separate thread and return its result
 		 */
-		return _longRunningProcess() ;
+		return _longRunningTask() ;
 
 	} ).then( []( const QString& r ){
 
@@ -67,3 +93,19 @@ void example::run()
 		QCoreApplication::quit() ;
 	} ) ;
 }
+
+#else
+
+/*
+ * Example 2
+ */
+void example::run()
+{
+	QString r = Task::await<QString>( _longRunningTask ) ;
+
+	qDebug() << r ;
+
+	QCoreApplication::quit() ;
+}
+
+#endif
