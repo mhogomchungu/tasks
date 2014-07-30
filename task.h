@@ -117,7 +117,7 @@ namespace Task
 		std::function< void( const T& ) > m_function ;
 		std::function< void( void ) > m_start ;
 		std::function< void( void ) > m_cancel ;
-		std::function< T( void ) > m_get ;
+		std::function< T ( void ) > m_get ;
 	};
 
 	template< typename T >
@@ -164,7 +164,7 @@ namespace Task
 		}
 		void then( std::function< void( void ) > function )
 		{
-			m_function = function ;
+			m_function = std::move( function ) ;
 			m_start() ;
 		}
 		void get()
@@ -281,7 +281,7 @@ namespace Task
 	}
 
 	template< typename T >
-	T await( std::future<T> t )
+	T await( std::future<T>&& t )
 	{
 		return Task::await<T>( [ & ](){ return t.get() ; } ) ;
 	}
