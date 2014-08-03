@@ -67,18 +67,18 @@ namespace Task
 	class future
 	{
 	public:
-		future() : m_function( []( const T& t ){ Q_UNUSED( t ) ; } )
+		future() : m_function( []( T t ){ Q_UNUSED( t ) ; } )
 		{
 		}
 		void setActions( std::function< void( void ) > start,
 				 std::function< void( void ) > cancel,
-				 std::function< T( void ) > get )
+				 std::function< T ( void ) > get )
 		{
 			m_start  = std::move( start ) ;
 			m_cancel = std::move( cancel ) ;
 			m_get    = std::move( get ) ;
 		}
-		void then( std::function< void( const T& ) > function )
+		void then( std::function< void( T ) > function )
 		{
 			m_function = std::move( function ) ;
 			m_start() ;
@@ -93,7 +93,7 @@ namespace Task
 
 			T q ;
 
-			m_function = [ & ]( T r ){  q = std::move( r ) ; p.exit() ; } ;
+			m_function = [ & ]( T r ){ q = std::move( r ) ; p.exit() ; } ;
 
 			m_start() ;
 
@@ -109,12 +109,12 @@ namespace Task
 		{
 			m_cancel() ;
 		}
-		void run( const T& arg )
+		void run( T r )
 		{
-			m_function( arg ) ;
+			m_function( std::move( r ) ) ;
 		}
 	private:
-		std::function< void( const T& ) > m_function ;
+		std::function< void( T ) > m_function ;
 		std::function< void( void ) > m_start ;
 		std::function< void( void ) > m_cancel ;
 		std::function< T ( void ) > m_get ;
@@ -137,7 +137,7 @@ namespace Task
 	private:
 		~ThreadHelper()
 		{
-			m_future.run( m_cargo ) ;
+			m_future.run( std::move( m_cargo ) ) ;
 		}
 		void run( void )
 		{
