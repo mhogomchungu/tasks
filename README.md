@@ -34,7 +34,7 @@ A short tutorial on task/async/await as implemented in C# can be viewed from thi
 
 [5] Disscussion about this can be found on the following link among other places: http://isocpp.org/files/papers/N3564.pdf
 
-[6] https://github.com/mhogomchungu/zuluCrypt/blob/7123e3c3a7c8c5b3b3b6958464fd92a7f780d827/zuluMount-gui/keydialog.cpp#L511
+[6] https://github.com/mhogomchungu/zuluCrypt/blob/527d3850fc028c9d42b24413babac1cfa288de97/zuluMount-gui/keydialog.cpp#L500
 
 [7] https://www.youtube.com/watch?v=Y475RshtAHA
 
