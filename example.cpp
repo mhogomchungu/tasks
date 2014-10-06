@@ -136,6 +136,14 @@ void example::run()
  */
 void example::run()
 {
+	/*
+	 * Task::await() function below does the following:
+	 * 1. suspends the run method.
+	 * 2. creates a new thread.
+	 * 3. runs the _longRunningTask method in the new thread.
+	 * 4. store the result of  _longRunningTask function in r.
+	 * 5. resumes the run method.
+	 */
 	QString r = Task::await<QString>( _longRunningTask ) ;
 
 	qDebug() << r ;

@@ -6,14 +6,21 @@ This project is inspired by this[1] video on channel9.
 
 The project seeks to do async based programming in Qt/C++ using modern C++ with lambdas.
 
-The project has two sets of APIs.
+This library wraps a function into a future where the result of the function
+can be retrieved through the future's 3 public methods:
 
-1. Task::run().then() API provides async based programming with continuation[4].
+1. .get()  runs the wrapped function on the current thread.
 
-2. Task::await() API provides the first API presented in a different way[5].
+2. .then() registers an event to be called when the wrapped function finishes
+           and then runs the wrapped function in a different thread.The registered function
+           will run in the current thread.
 
-Under certain use cases,they can be used interchangeably, and in others,only one or the other can be used.Some of the problems
-the first API causes and solved by the second API are discussed in this[7] youtube video.
+3. .await() suspends the calling function and then runs the wrapped function
+            in a separate thread and then unsuspends the calling function when
+            the wrapped function finish running.The suspension will be done
+            without blocking the current thread leaving free to perform other tasks.
+
+            recommending reading up on C#'s await keyword to get a sense of how this feature works.
 
 Example use case for the Task::run().then() API can be found here[0]. Additional example is [2] where an API is
 declared and [3] where the declared API is used.
@@ -34,7 +41,7 @@ A short tutorial on task/async/await as implemented in C# can be viewed from thi
 
 [5] Disscussion about this can be found on the following link among other places: http://isocpp.org/files/papers/N3564.pdf
 
-[6] https://github.com/mhogomchungu/zuluCrypt/blob/527d3850fc028c9d42b24413babac1cfa288de97/zuluMount-gui/keydialog.cpp#L500
+[6] https://github.com/mhogomchungu/zuluCrypt/blob/d45d384dfda048955cdb87a90b94f360bef9d618/zuluCrypt-gui/cryptfiles.cpp#L283
 
 [7] https://www.youtube.com/watch?v=Y475RshtAHA
 
