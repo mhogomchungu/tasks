@@ -20,7 +20,8 @@ can be retrieved through the future's 3 public methods:
             the wrapped function finish running.The suspension will be done
             without blocking the current thread leaving free to perform other tasks.
 
-            recommending reading up on C#'s await keyword to get a sense of how this feature works.
+
+recommending reading up on C#'s await keyword to get a sense of how .await() works.
 
 Example use case for the Task::run().then() API can be found here[0]. Additional example is [2] where an API is
 declared and [3] where the declared API is used.
