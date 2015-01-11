@@ -75,7 +75,7 @@ namespace Task
 		{
 		}
 	private:
-		virtual void run( void )
+		virtual void run()
 		{
 		}
 	};
@@ -147,7 +147,7 @@ namespace Task
 				  [ this ]( T& r ){ r = m_function() ; this->deleteLater() ; } )
 		{
 		}
-		future<T>& Future( void )
+		future<T>& Future()
 		{
 			return m_future ;
 		}
@@ -156,7 +156,7 @@ namespace Task
 		{
 			m_future.run( std::move( m_result ) ) ;
 		}
-		void run( void )
+		void run()
 		{
 			m_result =  m_function() ;
 		}
@@ -226,7 +226,7 @@ namespace Task
 				  [ this ](){ m_function() ; this->deleteLater() ; } )
 		{
 		}
-		future< void >& Future( void )
+		future< void >& Future()
 		{
 			return m_future ;
 		}
@@ -235,7 +235,7 @@ namespace Task
 		{
 			m_future.run() ;
 		}
-		void run( void )
+		void run()
 		{
 			m_function() ;
 		}
