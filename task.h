@@ -111,7 +111,7 @@ namespace Task
 
 			m_function = [ & ]( T r ){ q = std::move( r ) ; p.exit() ; } ;
 
-			m_start() ;
+			this->start() ;
 
 			p.exec() ;
 
@@ -192,7 +192,7 @@ namespace Task
 
 			m_function = [ & ](){ p.exit() ; } ;
 
-			m_start() ;
+			this->start() ;
 
 			p.exec() ;
 		}
