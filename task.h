@@ -1,5 +1,5 @@
 /*
- * copyright: 2014
+ * copyright: 2014-2015
  * name : Francis Banyikwa
  * email: mhogomchungu@gmail.com
  *
@@ -86,16 +86,16 @@ namespace Task
 	public:
 		future( std::function< void() > start,
 			std::function< void() > cancel,
-			std::function< void( T& ) > get )
+			std::function< void( T& ) > get ) :
+			m_start ( std::move( start ) ),
+			m_cancel( std::move( cancel ) ),
+			m_get   ( std::move( get ) )
 		{
-			m_start  = std::move( start ) ;
-			m_cancel = std::move( cancel ) ;
-			m_get    = std::move( get ) ;
 		}
 		void then( std::function< void( T ) > function )
 		{
 			m_function = std::move( function ) ;
-			m_start() ;
+			this->start() ;
 		}
 		T get()
 		{
@@ -171,16 +171,16 @@ namespace Task
 	public:
 		future( std::function< void() > start,
 			std::function< void() > cancel,
-			std::function< void() > get )
+			std::function< void() > get ) :
+			m_start ( std::move( start ) ),
+			m_cancel( std::move( cancel ) ),
+			m_get   ( std::move( get ) )
 		{
-			m_start  = std::move( start ) ;
-			m_cancel = std::move( cancel ) ;
-			m_get    = std::move( get ) ;
 		}
 		void then( std::function< void() > function )
 		{
 			m_function = std::move( function ) ;
-			m_start() ;
+			this->start() ;
 		}
 		void get()
 		{
