@@ -73,10 +73,10 @@ void example::start()
 	QMetaObject::invokeMethod( this,"run",Qt::QueuedConnection ) ;
 }
 
-auto _longRunningTask = []()
+QString _longRunningTask()
 {
 	return "abc" ;
-} ;
+}
 
 /*
  * Example 1

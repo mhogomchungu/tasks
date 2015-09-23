@@ -47,10 +47,10 @@
  * This library wraps a function into a future where the result of the function
  * can be retrieved through the future's 3 public methods:
  *
- * 1. .get() runs the wrapped function on the current thread.
+ * 1. .get()   runs the wrapped function on the current thread.
  *
- * 2. .then() registers an event to be called when the wrapped function finishes
- *            and then runs the wrapped function in a different thread.
+ * 2. .then()  runs the wrapped function on a separate thread and then runs its argument
+ *             on the current thread as a continuation of the wrapped function.
  *
  * 3. .await() suspends the calling function and then runs the wrapped function
  *             in a separate thread and then unsuspends the calling function when
@@ -58,6 +58,12 @@
  *             without blocking the current thread leaving free to perform other tasks.
  *
  *             recommending reading up on C#'s await keyword to get a sense of how this feature works.
+ *
+ *
+ * The future is of type "Task::future<T>&" or "Task::future<void>&" and "std::reference_wrapper" class
+ * can be used if they are to be managed in some sort of a container that can not handle references.
+ *
+ * [1] http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper
  */
 
 namespace Task
@@ -249,14 +255,12 @@ namespace Task
 	template< typename T >
 	future<T>& run( std::function< T() > function )
 	{
-		auto t = new ThreadHelper<T>( std::move( function ) ) ;
-		return t->Future() ;
+		return ( new ThreadHelper<T>( std::move( function ) ) )->Future() ;
 	}
 
 	static inline future< void >& run( std::function< void() > function )
 	{
-		auto t = new ThreadHelper< void >( std::move( function ) ) ;
-		return t->Future() ;
+		return ( new ThreadHelper< void >( std::move( function ) ) )->Future() ;
 	}
 
 	/*
@@ -313,7 +317,8 @@ Examples on how to use the library
 templated version that passes a return value of one function to another function
 ---------------------------------------------------------------------------------
 
-auto _a = [](){
+int _a()
+{
 	/*
 	 * This task will run on a different thread
 	 * This tasks returns a result
@@ -321,7 +326,8 @@ auto _a = [](){
 	return 0 ;
 }
 
-auto _b = []( int r ){
+void _b( int r )
+{
 	/*
 	 * This task will run on the original thread.
 	 * This tasks takes an argument returned by task _a
@@ -339,14 +345,16 @@ e.then( _b ) ;
 
 Non templated version that does not pass around return value
 ----------------------------------------------------------------
-auto _c = [](){
+void _c()
+{
 	/*
 	 * This task will run on a different thread
 	 * This tasks returns with no result
 	 */
 }
 
-auto _d = [](){
+void _d()
+{
 	/*
 	 * This task will run on the original thread.
 	 * This tasks takes no argument
