@@ -58,16 +58,6 @@
  *
  */
 
-static void _printThreadID()
-{
-	qDebug() << "Thread id: " << QThread::currentThreadId() ;
-}
-
-static void _useResult( const QString& e )
-{
-	Q_UNUSED( e ) ;
-}
-
 void example::start()
 {
 	QMetaObject::invokeMethod( this,"run",Qt::QueuedConnection ) ;
@@ -82,6 +72,16 @@ QString _longRunningTask()
  * Example 1
  */
 #if 1
+
+static void _printThreadID()
+{
+	qDebug() << "Thread id: " << QThread::currentThreadId() ;
+}
+
+static void _useResult( const QString& e )
+{
+	Q_UNUSED( e ) ;
+}
 
 void example::run()
 {
