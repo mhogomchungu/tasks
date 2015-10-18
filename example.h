@@ -37,7 +37,7 @@ class example : public QObject
 {
 	Q_OBJECT
 public:
-	void start( void ) ;
+	void start() ;
 private slots:
 	void run() ;
 

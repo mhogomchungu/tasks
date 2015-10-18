@@ -338,7 +338,7 @@ Task::run<int>( _a ).then( _b ) ;
 
 alternatively,
 
-Task::future<int>& e = Task::run( _a ) ;
+Task::future<int>& e = Task::run<int>( _a ) ;
 
 e.then( _b ) ;
 
