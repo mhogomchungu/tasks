@@ -7,7 +7,7 @@ The project seeks to do async based programming in Qt/C++ using modern C++ with 
 This library wraps a function into a future where the result of the wrapped function
 can be retrieved through the future's 3 public methods:
 
-1. .get()  runs the wrapped function on the current thread.
+1. .get()  runs the wrapped function on the current thread.Could block the thread and hang GUI.
 
 2. .then() registers an event to be called when the wrapped function finishes
            and then runs the wrapped function in a different thread.The registered function
@@ -15,11 +15,13 @@ can be retrieved through the future's 3 public methods:
 
 3. .await() This medhod does a few things:
             1. Suspends the current thread at a point where this medhod is called.
+
             2. Creates a background thread and then runs the wrapped function in the background thread.
+
             3. Unsuspends the current thread when the wrapped function finish and let the thread current
                continue normally.
 
-	    The suspension at step 1 is done without blocking the thread and hence the suspension
+            The suspension at step 1 is done without blocking the thread and hence the suspension
             can be done in the GUI thread and the GUI will remain responsive.
 
             recommending reading up on C#'s await keyword to get a sense of how .await() works.

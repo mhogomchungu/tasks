@@ -47,7 +47,7 @@
  * This library wraps a function into a future where the result of the function
  * can be retrieved through the future's 3 public methods:
  *
- * 1. .get()   runs the wrapped function on the current thread.
+ * 1. .get()   runs the wrapped function on the current thread.Could block the thread and hang GUI.
  *
  * 2. .then()  runs the wrapped function on a separate thread and then runs its argument
  *             on the current thread as a continuation of the wrapped function.
