@@ -15,21 +15,25 @@ can be retrieved through the future's 3 public methods:
 
             2. Runs the wrapped function on a background thread.
 
-            3. Runs the registered event on the current thread when the wrapped function finish running.
+            3. Runs the registered event on the current thread when the wrapped
+               function finish running.
 
 3. .await() This medhod does a few things:
 
             1. Suspends the current thread at a point where this medhod is called.
 
-            2. Creates a background thread and then runs the wrapped function in the background thread.
+            2. Creates a background thread and then runs the wrapped function in the
+               background thread.
 
-            3. Unsuspends the current thread when the wrapped function finish and let the thread current
-               continue normally.
+            3. Unsuspends the current thread when the wrapped function finish and let
+               the thread current continue normally.
 
-            The suspension at step 1 is done without blocking the thread and hence the suspension
-            can be done in the GUI thread and the GUI will remain responsive.
+            The suspension at step 1 is done without blocking the thread and hence the
+            suspension can be done in the GUI thread and the GUI will remain responsive.
 
-            recommending reading up on C#'s await keyword to get a sense of how .await() works.
+            recommending reading up on C#'s await keyword to get a sense of how
+            .await() works.
+
 
 Example use case for the Task::run().then() API can be found here[0]. Additional example is [2] where an API is
 declared and [3] where the declared API is used.
