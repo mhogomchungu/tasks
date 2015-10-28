@@ -49,13 +49,21 @@
  *
  * 1. .get()   runs the wrapped function on the current thread.Could block the thread and hang GUI.
  *
- * 2. .then()  runs the wrapped function on a separate thread and then runs its argument
- *             on the current thread as a continuation of the wrapped function.
+ * 2. .then()  This medhod does the following:
  *
- * 3. .await() This medhod does a few things:
+ *            1. Registers a medhod to be called when a wrapped function finish running.
+ *
+ *            2. Runs the wrapped function on a background thread.
+ *
+ *            3. Runs the registered event on the current thread when the wrapped function finish running.
+ *
+ * 3. .await() This medhod does the following:
+ *
  *             1. Suspends the current thread at a point where this medhod is called.
+ *
  *             2. Creates a background thread and then runs the wrapped function in the background
  *                thread.
+ *
  *             3. Unsuspends the current thread when the wrapped function finish and let the
  *                current thread continue normally.
  *
