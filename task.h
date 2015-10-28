@@ -47,19 +47,20 @@
  * This library wraps a function into a future where the result of the function
  * can be retrieved through the future's 3 public methods:
  *
- * 1. .get()   runs the wrapped function on the current thread.Could block the thread and hang GUI.
+ * 1. .get()   This method runs the wrapped function on the current thread
+ *             and could block the thread and hang GUI.
  *
- * 2. .then()  This medhod does the following:
+ * 2. .then()  This method does the following:
  *
- *            1. Registers a medhod to be called when a wrapped function finish running.
+ *            1. Registers a method to be called when a wrapped function finish running.
  *
  *            2. Runs the wrapped function on a background thread.
  *
  *            3. Runs the registered event on the current thread when the wrapped function finish running.
  *
- * 3. .await() This medhod does the following:
+ * 3. .await() This method does the following:
  *
- *             1. Suspends the current thread at a point where this medhod is called.
+ *             1. Suspends the current thread at a point where this method is called.
  *
  *             2. Creates a background thread and then runs the wrapped function in the background
  *                thread.

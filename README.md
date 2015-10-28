@@ -7,7 +7,8 @@ The project seeks to do async based programming in Qt/C++ using modern C++ with 
 This library wraps a function into a future where the result of the wrapped function
 can be retrieved through the future's 3 public methods:
 
-1. .get()  runs the wrapped function on the current thread.Could block the thread and hang GUI.
+1. .get()  This method runs the wrapped function on the current thread
+           and could block the thread and hang GUI.
 
 2. .then() This medhod does a few things:
 
