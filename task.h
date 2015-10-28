@@ -52,10 +52,15 @@
  * 2. .then()  runs the wrapped function on a separate thread and then runs its argument
  *             on the current thread as a continuation of the wrapped function.
  *
- * 3. .await() suspends the calling function and then runs the wrapped function
- *             in a separate thread and then unsuspends the calling function when
- *             the wrapped function finish running.The suspension will be done
- *             without blocking the current thread leaving free to perform other tasks.
+ * 3. .await() This medhod does a few things:
+ *             1. Suspends the current thread at a point where this medhod is called.
+ *             2. Creates a background thread and then runs the wrapped function in the background
+ *                thread.
+ *             3. Unsuspends the current thread when the wrapped function finish and let the
+ *                current thread continue normally.
+ *
+ *             The suspension at step 1 is done without blocking the thread and hence the suspension
+ *             can be done in the GUI thread and the GUI will remain responsive.
  *
  *             recommending reading up on C#'s await keyword to get a sense of how this feature works.
  *

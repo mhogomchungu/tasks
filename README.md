@@ -2,11 +2,9 @@
 
 Asynchronous programming in Qt/C++ using tasks,continuations and resumable functions.
 
-This project is inspired by this[1] video on channel9.
-
 The project seeks to do async based programming in Qt/C++ using modern C++ with lambdas.
 
-This library wraps a function into a future where the result of the function
+This library wraps a function into a future where the result of the wrapped function
 can be retrieved through the future's 3 public methods:
 
 1. .get()  runs the wrapped function on the current thread.
@@ -15,13 +13,16 @@ can be retrieved through the future's 3 public methods:
            and then runs the wrapped function in a different thread.The registered function
            will run in the current thread.
 
-3. .await() suspends the calling function and then runs the wrapped function
-            in a separate thread and then unsuspends the calling function when
-            the wrapped function finish running.The suspension will be done
-            without blocking the current thread leaving free to perform other tasks.
+3. .await() This medhod does a few things:
+            1. Suspends the current thread at a point where this medhod is called.
+            2. Creates a background thread and then runs the wrapped function in the background thread.
+            3. Unsuspends the current thread when the wrapped function finish and let the thread current
+               continue normally.
 
+	    The suspension at step 1 is done without blocking the thread and hence the suspension
+            can be done in the GUI thread and the GUI will remain responsive.
 
-recommending reading up on C#'s await keyword to get a sense of how .await() works.
+            recommending reading up on C#'s await keyword to get a sense of how .await() works.
 
 Example use case for the Task::run().then() API can be found here[0]. Additional example is [2] where an API is
 declared and [3] where the declared API is used.
@@ -32,11 +33,9 @@ A short tutorial on task/async/await as implemented in C# can be viewed from thi
 
 [0] https://github.com/mhogomchungu/tasks/blob/master/example.cpp
 
-[1] http://channel9.msdn.com/Blogs/Charles/Asynchronous-Programming-for-C-Developers-PPL-Tasks-and-Windows-8
+[2] https://github.com/mhogomchungu/zuluCrypt/blob/529582af891182a849756d5283d92293c991ec8e/zuluCrypt-gui/utility.h#L235
 
-[2] https://github.com/mhogomchungu/zuluCrypt/blob/d0439a4e36521e42fa9392b82dcefd3224d53334/zuluMount-gui/zulumounttask.h#L61
-
-[3] https://github.com/mhogomchungu/zuluCrypt/blob/d0439a4e36521e42fa9392b82dcefd3224d53334/zuluMount-gui/mainwindow.cpp#L812
+[3] https://github.com/mhogomchungu/zuluCrypt/blob/529582af891182a849756d5283d92293c991ec8e/zuluCrypt-gui/luksaddkey.cpp#L392
 
 [4] Disscussion about this can be found on the following link among other places: http://isocpp.org/files/papers/N3558.pdf
 
