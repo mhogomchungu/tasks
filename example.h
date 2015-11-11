@@ -40,7 +40,6 @@ public:
 	void start() ;
 private slots:
 	void run() ;
-
 };
 
 #endif //__EXAMPLE_H_INCLUDED__

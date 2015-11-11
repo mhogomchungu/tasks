@@ -10,16 +10,16 @@ can be retrieved through the future's 3 public methods:
 1. .get()  This method runs the wrapped function on the current thread
            and could block the thread and hang GUI.
 
-2. .then() This method does a few things:
+2. .then() This method does three things:
 
             1. Registers a method to be called when a wrapped function finish running.
 
             2. Runs the wrapped function on a background thread.
 
-            3. Runs the registered event on the current thread when the wrapped
+            3. Runs the registered method on the current thread when the wrapped
                function finish running.
 
-3. .await() This method does a few things:
+3. .await() This method does three things:
 
             1. Suspends the current thread at a point where this method is called.
 

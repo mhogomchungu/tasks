@@ -50,15 +50,15 @@
  * 1. .get()   This method runs the wrapped function on the current thread
  *             and could block the thread and hang GUI.
  *
- * 2. .then()  This method does the following:
+ * 2. .then()  This method does three things:
  *
- *            1. Registers a method to be called when a wrapped function finish running.
+ *             1. Registers a method to be called when a wrapped function finish running.
  *
- *            2. Runs the wrapped function on a background thread.
+ *             2. Runs the wrapped function on a background thread.
  *
- *            3. Runs the registered event on the current thread when the wrapped function finish running.
+ *             3. Runs the registered method on the current thread when the wrapped function finish running.
  *
- * 3. .await() This method does the following:
+ * 3. .await() This method does three things:
  *
  *             1. Suspends the current thread at a point where this method is called.
  *
@@ -74,8 +74,8 @@
  *             recommending reading up on C#'s await keyword to get a sense of how this feature works.
  *
  *
- * The future is of type "Task::future<T>&" or "Task::future<void>&" and "std::reference_wrapper" class
- * can be used if they are to be managed in some sort of a container that can not handle references.
+ * The future is of type "Task::future<T>&" or "Task::future<void>&" and "std::reference_wrapper"[1]
+ * class can be used if they are to be managed in a container that can not handle references.
  *
  * [1] http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper
  */
