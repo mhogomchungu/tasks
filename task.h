@@ -273,6 +273,12 @@ namespace Task
 		return ( new ThreadHelper<T>( std::move( function ) ) )->Future() ;
 	}
 
+	template< typename T,typename ... Args >
+	future<T>& run( std::function< T( Args ... ) > function,Args ... args )
+	{
+		return ( new ThreadHelper<T>( std::bind( function,args ... ) ) )->Future() ;
+	}
+
 	static inline future< void >& run( std::function< void() > function )
 	{
 		return ( new ThreadHelper< void >( std::move( function ) ) )->Future() ;
