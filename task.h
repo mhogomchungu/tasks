@@ -265,8 +265,9 @@ namespace Task
 	};
 
 	/*
-	 * Below API's wrappes a function around a future and then returns the future.
+	 * Below API wrappes a function around a future and then returns the future.
 	 */
+
 	template< typename T >
 	future<T>& run( std::function< T() > function )
 	{
@@ -276,32 +277,45 @@ namespace Task
 	template< typename T,typename ... Args >
 	future<T>& run( std::function< T( Args ... ) > function,Args ... args )
 	{
-		return ( new ThreadHelper<T>( std::bind( std::move( function ),args ... ) ) )->Future() ;
+		return Task::run<T>( std::bind( std::move( function ),args ... ) ) ;
 	}
 
 	static inline future< void >& run( std::function< void() > function )
 	{
-		return ( new ThreadHelper< void >( std::move( function ) ) )->Future() ;
+		return Task::run< void >( std::move( function ) ) ;
+	}
+
+	template< typename ... Args >
+	future< void >& run( std::function< void( Args ... ) > function,Args ... args )
+	{
+		return Task::run< void >( std::bind( std::move( function ),args ... ) ) ;
 	}
 
 	/*
 	 * A few useful helper functions
 	 */
 
-	static inline void await( Task::future<void>& e )
-	{
-		e.await() ;
-	}
-
-	static inline void await( std::function< void() > function )
-	{
-		Task::run( std::move( function ) ).await() ;
-	}
-
 	template< typename T >
 	T await( std::function< T() > function )
 	{
 		return Task::run<T>( std::move( function ) ).await() ;
+	}
+
+	template< typename T,typename ... Args >
+	T await( std::function< T( Args ... ) > function,Args ... args )
+	{
+		return Task::await<T>( std::bind( std::move( function ),args ... ) ) ;
+	}
+
+	template< typename ... Args >
+	void await( std::function< void() > function,Args ...args )
+	{
+		Task::await< void >( std::bind( std::move( function ),args ... ) ) ;
+	}
+
+	static inline void await( std::function< void() > function )
+	{
+		Task::await< void >( std::move( function ) ) ;
 	}
 
 	template< typename T >
@@ -311,19 +325,25 @@ namespace Task
 	}
 
 	template< typename T >
-	T await( std::future<T>&& t )
+	T await( std::future<T> t )
 	{
 		return Task::await<T>( [ & ](){ return t.get() ; } ) ;
 	}
 
 	/*
-	 * This method runs its argument in a separate thread and does not offer
+	 * These methods runs their argument in a separate thread and does not offer
 	 * continuation feature.Useful when wanting to just run a function in a
 	 * different thread.
 	 */
 	static inline void exec( std::function< void() > function )
 	{
 		Task::run( std::move( function ) ).start() ;
+	}
+
+	template< typename T,typename ... Args >
+	void exec( std::function< T( Args ... ) > function,Args ... args )
+	{
+		Task::exec( std::bind( std::move( function ),args ... ) ) ;
 	}
 }
 
