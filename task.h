@@ -276,7 +276,7 @@ namespace Task
 	template< typename T,typename ... Args >
 	future<T>& run( std::function< T( Args ... ) > function,Args ... args )
 	{
-		return ( new ThreadHelper<T>( std::bind( function,args ... ) ) )->Future() ;
+		return ( new ThreadHelper<T>( std::bind( std::move( function ),args ... ) ) )->Future() ;
 	}
 
 	static inline future< void >& run( std::function< void() > function )
