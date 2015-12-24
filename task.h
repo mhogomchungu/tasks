@@ -56,7 +56,8 @@
  *
  *             2. Runs the wrapped function on a background thread.
  *
- *             3. Runs the registered method on the current thread when the wrapped function finish running.
+ *             3. Runs the registered method on the current thread when the wrapped function finish
+ *                running.
  *
  * 3. .await() This method does three things:
  *
