@@ -105,9 +105,9 @@ namespace Task
 	class future
 	{
 	public:
-		future( std::function< void() > start,
-			std::function< void() > cancel,
-			std::function< void( T& ) > get ) :
+		future( std::function< void() >&& start,
+			std::function< void() >&& cancel,
+			std::function< void( T& ) >&& get ) :
 			m_start ( std::move( start ) ),
 			m_cancel( std::move( cancel ) ),
 			m_get   ( std::move( get ) )
@@ -190,9 +190,9 @@ namespace Task
 	class future< void >
 	{
 	public:
-		future( std::function< void() > start,
-			std::function< void() > cancel,
-			std::function< void() > get ) :
+		future( std::function< void() >&& start,
+			std::function< void() >&& cancel,
+			std::function< void() >&& get ) :
 			m_start ( std::move( start ) ),
 			m_cancel( std::move( cancel ) ),
 			m_get   ( std::move( get ) )
