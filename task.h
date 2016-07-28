@@ -86,7 +86,11 @@ namespace Task
 	public:
 		Thread()
 		{
-			connect( this,SIGNAL( finished() ),this,SLOT( deleteLater() ) ) ;
+			#if QT_VERSION < QT_VERSION_CHECK( 5,0,0 )
+				connect( this,SIGNAL( finished() ),this,SLOT( deleteLater() ) ) ;
+			#else
+				connect( this,&QThread::finished,this,&QThread::deleteLater ) ;
+			#endif
 		}
 	protected:
 		virtual ~Thread()
@@ -323,7 +327,7 @@ namespace Task
 	{
 		return Task::await<T>( std::bind( std::move( function ),std::move( args ) ... ) ) ;
 	}
-	
+
 	static inline void await( std::function< void() > function )
 	{
 		Task::await< void >( std::move( function ) ) ;
