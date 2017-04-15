@@ -35,6 +35,7 @@
 #include <QDebug>
 #include <QMetaObject>
 #include <QCoreApplication>
+#include <iostream>
 
 /*
  * Two examples are shown here,Example 1 and example 2.
@@ -75,7 +76,7 @@ QString _longRunningTask()
 
 static void _printThreadID()
 {
-	qDebug() << "Thread id: " << QThread::currentThreadId() ;
+	std::cout << "Thread id: " << QThread::currentThreadId() << std::endl ;
 }
 
 static void _useResult( const QString& e )

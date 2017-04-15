@@ -1,5 +1,5 @@
 ﻿/*
- * copyright: 2014-2016
+ * copyright: 2014-2017
  * name : Francis Banyikwa
  * email: mhogomchungu@gmail.com
  *
@@ -31,11 +31,13 @@
 #ifndef __TASK_H_INCLUDED__
 #define __TASK_H_INCLUDED__
 
+#include <vector>
 #include <utility>
 #include <future>
 #include <functional>
 #include <QThread>
 #include <QEventLoop>
+#include <QMutex>
 
 /*
  *
@@ -196,9 +198,12 @@ namespace Task
 	};
 
 	template<>
-	class future< void >
+	class future< void > : private QObject
 	{
 	public:
+		future()
+		{
+		}
 		future(	QThread * e ,
 			std::function< void() >&& start,
 			std::function< void() >&& cancel,
@@ -209,6 +214,10 @@ namespace Task
 			m_get   ( std::move( get ) )
 		{
 		}
+		void add_task( Task::future< void >& e )
+		{
+			m_tasks.emplace_back( e ) ;
+		}
 		void then( std::function< void() > function )
 		{
 			m_function = std::move( function ) ;
@@ -216,7 +225,12 @@ namespace Task
 		}
 		void get()
 		{
-			m_get() ;
+			if( m_tasks.size() > 0 ){
+
+				this->await() ;
+			}else{
+				m_get() ;
+			}
 		}
 		void await()
 		{
@@ -234,7 +248,15 @@ namespace Task
 		}
 		void start()
 		{
-			m_start() ;
+			if( m_tasks.size() > 0 ){
+
+				for( auto& it : m_tasks ){
+
+					it.get().then( [ & ](){ this->done() ; } ) ;
+				}
+			}else{
+				m_start() ;
+			}
 		}
 		void run()
 		{
@@ -245,11 +267,32 @@ namespace Task
 			m_cancel() ;
 		}
 	private:
-		QThread * m_thread ;
+		void done()
+		{
+			QMutexLocker m( &m_mutex ) ;
+
+			Q_UNUSED( m ) ;
+
+			m_counter++ ;
+
+			if( m_counter == m_tasks.size() ){
+
+				this->run() ;
+
+				this->deleteLater() ;
+			}
+		}
+
+		QThread * m_thread = nullptr ;
+
 		std::function< void() > m_function = [](){} ;
-		std::function< void() > m_start ;
-		std::function< void() > m_cancel ;
-		std::function< void() > m_get ;
+		std::function< void() > m_start = [](){} ;
+		std::function< void() > m_cancel = [](){} ;
+		std::function< void() > m_get = [](){} ;
+
+		QMutex m_mutex ;
+		std::vector< std::reference_wrapper< Task::future< void > > > m_tasks ;
+		decltype( m_tasks.size() ) m_counter = 0 ;
 	};
 
 	template<>
@@ -308,6 +351,58 @@ namespace Task
 	future< void >& run( std::function< void( Args ... ) > function,Args ... args )
 	{
 		return Task::run< void >( std::bind( std::move( function ),std::move( args ) ... ) ) ;
+	}
+
+	/*
+	 * Internal helper functions
+	 * ------------------------------------------------------------------------------------
+	 */
+	static inline void _private_add_task( Task::future< void >& f )
+	{
+		Q_UNUSED( f ) ;
+	}
+
+	static inline void _private_add_future( Task::future< void >& f )
+	{
+		Q_UNUSED( f ) ;
+	}
+
+	template< typename E,typename ... T >
+	void _private_add_task( Task::future< void >& f,E&& e,T&& ... t )
+	{
+		f.add_task( Task::run< void >( std::move( e ) ) ) ;
+		_private_add_task( f,std::move( t ) ... ) ;
+	}
+
+	template< typename ... T >
+	void _private_add_future( Task::future< void >& f,Task::future< void >& e,T&& ... t )
+	{
+		f.add_task( e ) ;
+		_private_add_future( f,std::forward<T>( t ) ... ) ;
+	}
+	/*
+	 * ------------------------------------------------------------------------------------
+	 */
+	template< typename ... T >
+	Task::future< void >& run( std::function< void() > f,T ... t )
+	{
+		auto& e = *( new Task::future< void >() ) ;
+
+		_private_add_task( e,std::move( f ) ) ;
+		_private_add_task( e,std::move( t ) ... ) ;
+
+		return e ;
+	}
+
+	template< typename ... T >
+	Task::future< void >& run( Task::future< void >& s,T&& ... t )
+	{
+		auto& e = *( new Task::future< void >() ) ;
+
+		_private_add_future( e,s ) ;
+		_private_add_future( e,std::forward<T>( t ) ... ) ;
+
+		return e ;
 	}
 
 	/*
