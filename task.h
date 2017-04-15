@@ -571,6 +571,24 @@ alternatively,
 
 r = Task::await( foo_2,6 ) ;
 
+*******************************************************************
+* Example use cases on how to run multiple tasks and wait for all to
+* to finish before continuing
+*******************************************************************
+
+Task::future<void>& e = Task::run( fn1,fn2,fn3 ) ;
+
+or alternatively,
+
+Task::future<void>& f1 = Task::run( fn1 ) ;
+Task::future<void>& f2 = Task::run( fn2 ) ;
+Task::future<void & f3 = Task::run( fn3 ) ;
+
+Task::future<void>& e = Task::run( f1,f2,f3 ) ;
+
+1.0 .await() can then be called on the future to wait for all tasks to finish before continuing.
+2.0 .then()  can then be called on the future to invoke a callback on the current thread when all tasks finish.
+
 #endif //end example block
 
 #endif //__TASK_H_INCLUDED__
