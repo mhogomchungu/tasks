@@ -170,11 +170,11 @@ static void _testing_task_future_all()
 
 	e.await() ;
 
+	std::cout<< "Testing Task::run().then() multiple tasks" << std::endl ;
+
 	Task::future<void>& f1 = Task::run( fn1 ) ;
 	Task::future<void>& f2 = Task::run( fn2 ) ;
 	Task::future<void>& f3 = Task::run( fn3 ) ;
-
-	std::cout<< "Testing Task::run().then() multiple tasks" << std::endl ;
 
 	Task::future<void>& s = Task::run( f1,f2,f3 ) ;
 
