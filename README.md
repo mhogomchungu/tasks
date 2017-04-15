@@ -36,25 +36,10 @@ can be retrieved through the future's 3 public methods:
             .await() works.
 
 
-Example use case for the Task::run().then() API can be found here[0]. Additional example is [2] where an API is
-declared and [3] where the declared API is used.
-
-Example use case of the Task::await() API is here[6] where a function call "blocks" waiting for a result without "hanging" the entire GUI application.
+Documentation of how to use the library is here[1] and here[2].
 
 A short tutorial on task/async/await as implemented in C# can be viewed from this[8] link.
 
-[0] https://github.com/mhogomchungu/tasks/blob/master/example.cpp
+[1] https://github.com/mhogomchungu/tasks/blob/master/example.cpp
 
-[2] https://github.com/mhogomchungu/zuluCrypt/blob/529582af891182a849756d5283d92293c991ec8e/zuluCrypt-gui/utility.h#L235
-
-[3] https://github.com/mhogomchungu/zuluCrypt/blob/529582af891182a849756d5283d92293c991ec8e/zuluCrypt-gui/luksaddkey.cpp#L392
-
-[4] Disscussion about this can be found on the following link among other places: http://isocpp.org/files/papers/N3558.pdf
-
-[5] Disscussion about this can be found on the following link among other places: http://isocpp.org/files/papers/N3564.pdf
-
-[6] https://github.com/mhogomchungu/zuluCrypt/blob/3671e2ea8ae37fb07105de0e2a856b766b6f9fc3/zuluCrypt-gui/createkeyfile.cpp#L179
-
-[7] https://www.youtube.com/watch?v=Y475RshtAHA
-
-[8] http://www.youtube.com/watch?v=DqjIQiZ_ql4
+[2] https://github.com/mhogomchungu/tasks/blob/6bedfe985eab3ec9bee94bc0d67c1364898edf24/task.h#L465

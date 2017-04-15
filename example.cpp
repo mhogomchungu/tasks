@@ -59,6 +59,9 @@
  *
  */
 
+static void _testing_task_await() ;
+static void _testing_task_future_all() ;
+
 void example::start()
 {
 	QMetaObject::invokeMethod( this,"run",Qt::QueuedConnection ) ;
@@ -68,11 +71,6 @@ QString _longRunningTask()
 {
 	return "abc" ;
 }
-
-/*
- * Example 1
- */
-#if 1
 
 static void _printThreadID()
 {
@@ -84,12 +82,13 @@ static void _useResult( const QString& e )
 	Q_UNUSED( e ) ;
 }
 
-void example::run()
+/*
+ * A sample use where a task is run on separate thread and return a value and the returned
+ * value is used on another task run on the original thread
+ */
+static void _test_run_then()
 {
-	/*
-	 * A sample use where a task is run on separate thread and return a value and the returned
-	 * value is used on another task run on the original thread
-	 */
+	std::cout<< "Testing Task::run().then()" << std::endl ;
 
 	/*
 	 * print the thread id to know we are on what thread.
@@ -124,32 +123,66 @@ void example::run()
 		_printThreadID() ;
 
 		/*
-		 * exit the application since we have reached the end of the demo.
+		 * moving on to the next test.
 		 */
-		QCoreApplication::quit() ;
+		_testing_task_await() ;
 	} ) ;
 }
 
-#else
-
 /*
- * Example 2
+ * Task::await() function below does the following:
+ * 1. suspends the "_testing_task_await" method at a point where Task::await() method is called.
+ * 2. creates a new thread.
+ * 3. runs the _longRunningTask method in the new thread.
+ * 4. store the result of  _longRunningTask function in r.
+ * 5. resumes "_testing_task_await" method method.
  */
-void example::run()
+static void _testing_task_await()
 {
-	/*
-	 * Task::await() function below does the following:
-	 * 1. suspends the run method.
-	 * 2. creates a new thread.
-	 * 3. runs the _longRunningTask method in the new thread.
-	 * 4. store the result of  _longRunningTask function in r.
-	 * 5. resumes the run method.
-	 */
-	QString r = Task::await<QString>( _longRunningTask ) ;
+	std::cout<< "Testing Task::run().then()" << std::endl ;
 
-	qDebug() << r ;
+	QString e = Task::await<QString>( _longRunningTask ) ;
 
-	QCoreApplication::quit() ;
+	std::cout << e.toLatin1().constData() << std::endl ;
+
+	_testing_task_future_all() ;
 }
 
-#endif
+/*
+ * Task::run() function below does the following:
+ * 1. Collects a bunch of tasks.
+ * 2. Runs each task on its own thread.
+ * 3. Returns a future that holds all above tasks.
+ * 4. .await() can be called on the future to suspend the current thread at a point
+ *    where this medhod is called to wait for all tasks to finish.
+ * 5. .then() can be called on the future to register an event to be called when all
+ *    tasks finish running.
+ */
+static void _testing_task_future_all()
+{
+	auto fn1 = [](){ _printThreadID(); } ;
+	auto fn2 = [](){ _printThreadID(); } ;
+	auto fn3 = [](){ _printThreadID(); } ;
+
+	std::cout<< "Testing Task::run().await() multiple tasks" << std::endl ;
+
+	Task::future<void>& e = Task::run( fn1,fn2,fn3 ) ;
+
+	e.await() ;
+
+	Task::future<void>& f1 = Task::run( fn1 ) ;
+	Task::future<void>& f2 = Task::run( fn2 ) ;
+	Task::future<void>& f3 = Task::run( fn3 ) ;
+
+	std::cout<< "Testing Task::run().then() multiple tasks" << std::endl ;
+
+	Task::future<void>& s = Task::run( f1,f2,f3 ) ;
+
+	s.then( [](){ QCoreApplication::quit() ;} ) ;
+}
+
+void example::run()
+{
+	_test_run_then() ;
+}
+
