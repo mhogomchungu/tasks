@@ -354,8 +354,7 @@ namespace Task
 	}
 
 	/*
-	 * Internal helper functions
-	 * ------------------------------------------------------------------------------------
+	 * -------------------------Start internal helper functions-------------------------
 	 */
 	static inline void _private_add_task( Task::future< void >& f )
 	{
@@ -381,7 +380,7 @@ namespace Task
 		_private_add_future( f,std::forward<T>( t ) ... ) ;
 	}
 	/*
-	 * ------------------------------------------------------------------------------------
+	 * -------------------------End internal helper functions-------------------------
 	 */
 	template< typename ... T >
 	Task::future< void >& run( std::function< void() > f,T ... t )
