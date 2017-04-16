@@ -236,7 +236,10 @@ namespace Task
 		{
 			if( m_tasks.size() > 0 ){
 
-				this->await() ;
+				for( auto& it : m_tasks ){
+
+					it.get().get() ;
+				}
 			}else{
 				m_get() ;
 			}
