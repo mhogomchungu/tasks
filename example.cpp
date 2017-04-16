@@ -1,5 +1,5 @@
 /*
- * copyright: 2014-2015
+ * copyright: 2014-2017
  * name : Francis Banyikwa
  * email: mhogomchungu@gmail.com
  *
@@ -32,7 +32,6 @@
 #include "example.h"
 
 #include <QString>
-#include <QDebug>
 #include <QMetaObject>
 #include <QCoreApplication>
 #include <iostream>
@@ -160,14 +159,26 @@ static void _testing_task_future_all()
 
 	Task::future<void>& s = Task::run( f1,f2,f3 ) ;
 
-	s.then( [](){ QCoreApplication::quit() ;} ) ;
+	s.then( [](){
 
-	/*
-	 * moving on to the next test.
-	 */
-	_testing_multiple_tasks() ;
+		/*
+		 * moving on to the next test.
+		 */
+		_testing_multiple_tasks() ;
+	} ) ;
 }
 
+/*
+ * Task::run() function below does the following:
+ * 1. Collects a bunch of tasks and their continuations.
+ * 2. Runs each task on its own thread.
+ * 3. On completion of each task,run its continuation on the current thread.
+ * 4. Returns a future that holds all above tasks.
+ * 5. .await() can be called on the future to suspend the current thread at a point
+ *    where this medhod is called to wait for all tasks to finish.
+ * 6. .then() can be called on the future to register an event to be called when all
+ *    tasks finish running.
+ */
 static void _testing_multiple_tasks()
 {
 	std::cout<< "Testing  multiple tasks" << std::endl ;
