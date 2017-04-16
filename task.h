@@ -82,6 +82,11 @@
 
 namespace Task
 {
+	template< typename T >
+	using pair = std::pair< std::function< T() >,std::function< void( T ) > > ;
+
+	using void_pair = std::pair< std::function< void() >,std::function< void() > > ;
+
 	class Thread : public QThread
 	{
 		Q_OBJECT
@@ -105,28 +110,26 @@ namespace Task
 	};
 
 	template< typename T >
-	class future
+	class future : private QObject
 	{
 	public:
-		future() = delete ;
-		future( const future& ) = delete ;
-		future( future&& ) = delete ;
-		future& operator=( const future& ) = delete ;
-		future& operator=( future&& ) = delete ;
-
-		future( QThread * e,
-			std::function< void() >&& start,
-			std::function< void() >&& cancel,
-			std::function< void( T& ) >&& get ) :
-			m_thread( e ),
-			m_start ( std::move( start ) ),
-			m_cancel( std::move( cancel ) ),
-			m_get   ( std::move( get ) )
-		{
-		}
+		/*
+		 * ----------------Start of public API----------------
+		 */
+		/*
+		 * Use this API if you care about the result
+		 */
 		void then( std::function< void( T ) > function )
 		{
 			m_function = std::move( function ) ;
+			this->start() ;
+		}
+		/*
+		 * Use this API if you DO NOT care about the result
+		 */
+		void then( std::function< void() > function )
+		{
+			m_function_1 = std::move( function ) ;
 			this->start() ;
 		}
 		T get()
@@ -155,80 +158,97 @@ namespace Task
 		}
 		void start()
 		{
-			m_start() ;
+			if( m_tasks.size() > 0 ){
+
+				for( auto& it : m_tasks ){
+
+					it.first.get().then( [ & ]( T&& e ){
+
+						QMutexLocker m( &m_mutex ) ;
+
+						Q_UNUSED( m ) ;
+
+						m_counter++ ;
+
+						it.second( std::move( e ) ) ;
+
+						if( m_counter == m_tasks.size() ){
+
+							if( m_function_1 != nullptr ){
+
+								m_function_1() ;
+							}else{
+								m_function( T() ) ;
+							}
+
+							this->deleteLater() ;
+						}
+					} ) ;
+				}
+			}else{
+				m_start() ;
+			}
 		}
 		void cancel()
 		{
 			m_cancel() ;
 		}
-		void run( T&& r )
-		{
-			m_function( std::move( r ) ) ;
-		}
-	private:
-		QThread * m_thread ;
-		std::function< void( T ) > m_function = []( T&& t ){ Q_UNUSED( t ) ; } ;
-		std::function< void() > m_start ;
-		std::function< void() > m_cancel ;
-		std::function< void( T& ) > m_get ;
-	};
-
-	template< typename T >
-	class ThreadHelper : public Thread
-	{
-	public:
-		ThreadHelper( std::function< T() >&& function ) :
-			m_function( std::move( function ) ),
-			m_future( this,
-				  [ this ](){ this->start() ; },
-				  [ this ](){ this->deleteLater() ; },
-				  [ this ]( T& r ){ r = m_function() ; this->deleteLater() ; } )
-		{
-		}
-		future<T>& Future()
-		{
-			return m_future ;
-		}
-	private:
-		~ThreadHelper()
-		{
-			m_future.run( std::move( m_result ) ) ;
-		}
-		void run()
-		{
-			m_result = m_function() ;
-		}
-		std::function< T() > m_function ;
-		future<T> m_future ;
-		T m_result ;
-	};
-
-	template<>
-	class future< void > : private QObject
-	{
-	public:
+		/*
+		 * ----------------End of public API----------------
+		 */
 		future() = default ;
 		future( const future& ) = delete ;
 		future( future&& ) = delete ;
 		future& operator=( const future& ) = delete ;
 		future& operator=( future&& ) = delete ;
 
-		future(	QThread * e ,
+		future( QThread * e,
 			std::function< void() >&& start,
 			std::function< void() >&& cancel,
-			std::function< void() >&& get ) :
+			std::function< void( T& ) >&& get ) :
 			m_thread( e ),
 			m_start ( std::move( start ) ),
 			m_cancel( std::move( cancel ) ),
 			m_get   ( std::move( get ) )
 		{
 		}
-		void add_task( Task::future< void >& e,std::function< void() > s = [](){} )
+		void run( T&& r )
 		{
-			using reference_t = std::reference_wrapper< Task::future< void > > ;
-			using pair_t = std::pair< reference_t,std::function< void() > > ;
+			if( m_function_1 != nullptr ){
+
+				m_function_1() ;
+			}else{
+				m_function( std::move( r ) ) ;
+			}
+		}
+		void add_task( Task::future< T >& e,std::function< void( T ) > s = []( T e ){ Q_UNUSED( e ) ; } )
+		{
+			using reference_t = std::reference_wrapper< Task::future< T > > ;
+			using pair_t = std::pair< reference_t,std::function< void( T ) > > ;
 			m_tasks.emplace_back( pair_t{ e,std::move( s ) } ) ;
 		}
+	private:
+		QThread * m_thread ;
+		std::function< void( T ) > m_function = []( T&& t ){ Q_UNUSED( t ) ; } ;
+		std::function< void() > m_function_1 = nullptr ;
+		std::function< void() > m_start ;
+		std::function< void() > m_cancel ;
+		std::function< void( T& ) > m_get ;
+
+		QMutex m_mutex ;
+		using reference_t = std::reference_wrapper< Task::future< T > > ;
+
+		std::vector< std::pair< reference_t,std::function< void( T ) > > > m_tasks ;
+		decltype( m_tasks.size() ) m_counter = 0 ;
+	};
+
+	template<>
+	class future< void > : private QObject
+	{
+	public:
+		/*
+		 * ----------------Start of public API----------------
+		 */
 		void then( std::function< void() > function )
 		{
 			m_function = std::move( function ) ;
@@ -288,10 +308,6 @@ namespace Task
 				m_start() ;
 			}
 		}
-		void run()
-		{
-			m_function() ;
-		}
 		void cancel()
 		{
 			if( m_tasks.size() > 0 ){
@@ -300,6 +316,35 @@ namespace Task
 			}else{
 				m_cancel() ;
 			}
+		}
+		/*
+		 * ----------------End of public API----------------
+		 */
+		future() = default ;
+		future( const future& ) = delete ;
+		future( future&& ) = delete ;
+		future& operator=( const future& ) = delete ;
+		future& operator=( future&& ) = delete ;
+
+		future(	QThread * e ,
+			std::function< void() >&& start,
+			std::function< void() >&& cancel,
+			std::function< void() >&& get ) :
+			m_thread( e ),
+			m_start ( std::move( start ) ),
+			m_cancel( std::move( cancel ) ),
+			m_get   ( std::move( get ) )
+		{
+		}
+		void add_task( Task::future< void >& e,std::function< void() > s = [](){} )
+		{
+			using reference_t = std::reference_wrapper< Task::future< void > > ;
+			using pair_t = std::pair< reference_t,std::function< void() > > ;
+			m_tasks.emplace_back( pair_t{ e,std::move( s ) } ) ;
+		}
+		void run()
+		{
+			m_function() ;
 		}
 	private:
 		QThread * m_thread = nullptr ;
@@ -314,6 +359,36 @@ namespace Task
 
 		std::vector< std::pair< reference_t,std::function< void() > > > m_tasks ;
 		decltype( m_tasks.size() ) m_counter = 0 ;
+	};
+
+	template< typename T >
+	class ThreadHelper : public Thread
+	{
+	public:
+		ThreadHelper( std::function< T() >&& function ) :
+			m_function( std::move( function ) ),
+			m_future( this,
+				  [ this ](){ this->start() ; },
+				  [ this ](){ this->deleteLater() ; },
+				  [ this ]( T& r ){ r = m_function() ; this->deleteLater() ; } )
+		{
+		}
+		future<T>& Future()
+		{
+			return m_future ;
+		}
+	private:
+		~ThreadHelper()
+		{
+			m_future.run( std::move( m_result ) ) ;
+		}
+		void run()
+		{
+			m_result = m_function() ;
+		}
+		std::function< T() > m_function ;
+		future<T> m_future ;
+		T m_result ;
 	};
 
 	template<>
@@ -374,8 +449,6 @@ namespace Task
 		return Task::run< void >( std::bind( std::move( function ),std::move( args ) ... ) ) ;
 	}
 
-	using pair = std::pair< std::function< void() >,std::function< void() > > ;
-
 	/*
 	 * -------------------------Start internal helper functions-------------------------
 	 */
@@ -389,7 +462,8 @@ namespace Task
 		Q_UNUSED( f ) ;
 	}
 
-	static inline void _private_add_pair( Task::future< void >& f )
+	template< typename T >
+	void _private_add_pair( Task::future< T >& f )
 	{
 		Q_UNUSED( f ) ;
 	}
@@ -408,10 +482,11 @@ namespace Task
 		_private_add_future( f,std::forward<T>( t ) ... ) ;
 	}
 
-	template< typename ... T >
-	void _private_add_pair( Task::future< void >& f,pair&& s,T&& ... t )
+	template< typename E,typename F,typename ... T >
+	void _private_add_pair( Task::future< E >& f,F&& s,T&& ... t )
 	{
-		f.add_task( Task::run< void >( std::move( s.first ) ),std::move( s.second ) ) ;
+
+		f.add_task( Task::run< E >( std::move( s.first ) ),std::move( s.second ) ) ;
 		_private_add_pair( f,std::forward<T>( t ) ... ) ;
 	}
 	/*
@@ -439,8 +514,19 @@ namespace Task
 		return e ;
 	}
 
+	template< typename E,typename ... T >
+	Task::future< E >& run( pair< E > s,T ... t )
+	{
+		auto& e = *( new Task::future< E >() ) ;
+
+		_private_add_pair( e,std::move( s ) ) ;
+		_private_add_pair( e,std::move( t ) ... ) ;
+
+		return e ;
+	}
+
 	template< typename ... T >
-	Task::future< void >& run( pair s,T ... t )
+	Task::future< void >& run( void_pair s,T ... t )
 	{
 		auto& e = *( new Task::future< void >() ) ;
 
@@ -449,7 +535,6 @@ namespace Task
 
 		return e ;
 	}
-
 	/*
 	 *
 	 * A few useful helper functions
@@ -640,19 +725,37 @@ Task::future<void>& e = Task::run( f1,f2,f3 ) ;
 * and wait for all to finish before continuing
 *******************************************************************
 
-auto fn1 = [](){} ;
-auto fn2 = [](){} ;
-auto fn3 = [](){} ;
+std::cout<< "Testing multiple tasks without continuation arguments" << std::endl ;
 
-auto r1 = [](){ std::cout << "r1" << std::endl ; } ;
-auto r2 = [](){ std::cout << "r2" << std::endl ; } ;
-auto r3 = [](){ std::cout << "r3" << std::endl ; } ;
+auto fna1 = [](){ _printThreadID(); } ;
+auto fna2 = [](){ _printThreadID(); } ;
+auto fna3 = [](){ _printThreadID(); } ;
 
-Task::future<void>& e = Task::run( Task::pair{ fn1,r1 },
-				   Task::pair{ fn2,r2 },
-				   Task::pair{ fn3,r3 } ) ;
+auto ra1 = [](){ std::cout << "r1" << std::endl ; } ;
+auto ra2 = [](){ std::cout << "r2" << std::endl ; } ;
+auto ra3 = [](){ std::cout << "r3" << std::endl ; } ;
+
+Task::future<void>& e = Task::run( Task::void_pair{ fna1,ra1 },
+				   Task::void_pair{ fna2,ra2 },
+				   Task::void_pair{ fna3,ra3 } ) ;
 
 e.await() ;
+
+std::cout<< "Testing multiple tasks with continuation arguments" << std::endl ;
+
+auto fn1 = [](){ _printThreadID(); return 0 ;} ;
+auto fn2 = [](){ _printThreadID(); return 0 ;} ;
+auto fn3 = [](){ _printThreadID(); return 0 ; } ;
+
+auto r1 = []( int ){ std::cout << "r1" << std::endl ; } ;
+auto r2 = []( int ){ std::cout << "r2" << std::endl ; } ;
+auto r3 = []( int ){ std::cout << "r3" << std::endl ; } ;
+
+Task::future<int>& s = Task::run(  Task::pair<int>{ fn1,r1 },
+				   Task::pair<int>{ fn2,r2 },
+				   Task::pair<int>{ fn3,r3 } ) ;
+
+s.then( [](){ QCoreApplication::quit() ;} ) ;
 
 #endif //end example block
 

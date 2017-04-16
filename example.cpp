@@ -181,23 +181,37 @@ static void _testing_task_future_all()
  */
 static void _testing_multiple_tasks()
 {
-	std::cout<< "Testing  multiple tasks" << std::endl ;
+	std::cout<< "Testing multiple tasks without continuation arguments" << std::endl ;
 
-	auto fn1 = [](){ _printThreadID(); } ;
-	auto fn2 = [](){ _printThreadID(); } ;
-	auto fn3 = [](){ _printThreadID(); } ;
+	auto fna1 = [](){ _printThreadID(); } ;
+	auto fna2 = [](){ _printThreadID(); } ;
+	auto fna3 = [](){ _printThreadID(); } ;
 
-	auto r1 = [](){ std::cout << "r1" << std::endl ; } ;
-	auto r2 = [](){ std::cout << "r2" << std::endl ; } ;
-	auto r3 = [](){ std::cout << "r3" << std::endl ; } ;
+	auto ra1 = [](){ std::cout << "r1" << std::endl ; } ;
+	auto ra2 = [](){ std::cout << "r2" << std::endl ; } ;
+	auto ra3 = [](){ std::cout << "r3" << std::endl ; } ;
 
-	Task::future<void>& e = Task::run( Task::pair{ fn1,r1 },
-					   Task::pair{ fn2,r2 },
-					   Task::pair{ fn3,r3 } ) ;
+	Task::future<void>& e = Task::run( Task::void_pair{ fna1,ra1 },
+					   Task::void_pair{ fna2,ra2 },
+					   Task::void_pair{ fna3,ra3 } ) ;
 
 	e.await() ;
 
-	QCoreApplication::quit() ;
+	std::cout<< "Testing multiple tasks with continuation arguments" << std::endl ;
+
+	auto fn1 = [](){ _printThreadID(); return 0 ;} ;
+	auto fn2 = [](){ _printThreadID(); return 0 ;} ;
+	auto fn3 = [](){ _printThreadID(); return 0 ; } ;
+
+	auto r1 = []( int ){ std::cout << "r1" << std::endl ; } ;
+	auto r2 = []( int ){ std::cout << "r2" << std::endl ; } ;
+	auto r3 = []( int ){ std::cout << "r3" << std::endl ; } ;
+
+	Task::future<int>& s = Task::run(  Task::pair<int>{ fn1,r1 },
+					   Task::pair<int>{ fn2,r2 },
+					   Task::pair<int>{ fn3,r3 } ) ;
+
+	s.then( [](){ QCoreApplication::quit() ;} ) ;
 }
 
 
