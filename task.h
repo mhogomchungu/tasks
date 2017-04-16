@@ -273,7 +273,12 @@ namespace Task
 		}
 		void cancel()
 		{
-			m_cancel() ;
+			if( m_tasks.size() > 0 ){
+
+				this->deleteLater() ;
+			}else{
+				m_cancel() ;
+			}
 		}
 	private:
 		void done()
