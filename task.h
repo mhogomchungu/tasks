@@ -108,6 +108,12 @@ namespace Task
 	class future
 	{
 	public:
+		future() = delete ;
+		future( const future& ) = delete ;
+		future( future&& ) = delete ;
+		future& operator=( const future& ) = delete ;
+		future& operator=( future&& ) = delete ;
+
 		future( QThread * e,
 			std::function< void() >&& start,
 			std::function< void() >&& cancel,
@@ -201,9 +207,12 @@ namespace Task
 	class future< void > : private QObject
 	{
 	public:
-		future()
-		{
-		}
+		future() = default ;
+		future( const future& ) = delete ;
+		future( future&& ) = delete ;
+		future& operator=( const future& ) = delete ;
+		future& operator=( future&& ) = delete ;
+
 		future(	QThread * e ,
 			std::function< void() >&& start,
 			std::function< void() >&& cancel,
