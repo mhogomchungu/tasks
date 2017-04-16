@@ -37,30 +37,9 @@
 #include <QCoreApplication>
 #include <iostream>
 
-/*
- * Two examples are shown here,Example 1 and example 2.
- *
- * Explanation of example 1.
- * You can think of Task::run().then() as registering an event for two tasks to be performed in sequence.
- * The first task will be performed and on completion,the second task will be started with the result
- * of the first task.
- *
- * The first task will run on a separate thread and the second one will run on the original thread.
- *
- * The rest of the method will be free to continue independently of the registered tasks.
- *
- * Explanation of example 2.
- *
- * You can think of Task::await() as "suspending" the execution of the method until the result of the task is returned.
- * The suspension is done without blocking the thread and hence the suspension can happen on the GUI thread
- * and the GUI will not hang as a result of it.
- *
- * The net result of example 1 and example 2 are the same.Which one to use depend on your usecase.
- *
- */
-
 static void _testing_task_await() ;
 static void _testing_task_future_all() ;
+static void _testing_multiple_tasks() ;
 
 void example::start()
 {
@@ -145,6 +124,9 @@ static void _testing_task_await()
 
 	std::cout << e.toLatin1().constData() << std::endl ;
 
+	/*
+	 * moving on to the next test.
+	 */
 	_testing_task_future_all() ;
 }
 
@@ -179,7 +161,34 @@ static void _testing_task_future_all()
 	Task::future<void>& s = Task::run( f1,f2,f3 ) ;
 
 	s.then( [](){ QCoreApplication::quit() ;} ) ;
+
+	/*
+	 * moving on to the next test.
+	 */
+	_testing_multiple_tasks() ;
 }
+
+static void _testing_multiple_tasks()
+{
+	std::cout<< "Testing  multiple tasks" << std::endl ;
+
+	auto fn1 = [](){ _printThreadID(); } ;
+	auto fn2 = [](){ _printThreadID(); } ;
+	auto fn3 = [](){ _printThreadID(); } ;
+
+	auto r1 = [](){ std::cout << "r1" << std::endl ; } ;
+	auto r2 = [](){ std::cout << "r2" << std::endl ; } ;
+	auto r3 = [](){ std::cout << "r3" << std::endl ; } ;
+
+	Task::future<void>& e = Task::run( Task::pair{ fn1,r1 },
+					   Task::pair{ fn2,r2 },
+					   Task::pair{ fn3,r3 } ) ;
+
+	e.await() ;
+
+	QCoreApplication::quit() ;
+}
+
 
 void example::run()
 {

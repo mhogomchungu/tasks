@@ -223,9 +223,11 @@ namespace Task
 			m_get   ( std::move( get ) )
 		{
 		}
-		void add_task( Task::future< void >& e )
+		void add_task( Task::future< void >& e,std::function< void() > s = [](){} )
 		{
-			m_tasks.emplace_back( e ) ;
+			using reference_t = std::reference_wrapper< Task::future< void > > ;
+			using pair_t = std::pair< reference_t,std::function< void() > > ;
+			m_tasks.emplace_back( pair_t{ e,std::move( s ) } ) ;
 		}
 		void then( std::function< void() > function )
 		{
@@ -238,7 +240,7 @@ namespace Task
 
 				for( auto& it : m_tasks ){
 
-					it.get().get() ;
+					it.first.get().get() ;
 				}
 			}else{
 				m_get() ;
@@ -264,7 +266,23 @@ namespace Task
 
 				for( auto& it : m_tasks ){
 
-					it.get().then( [ & ](){ this->done() ; } ) ;
+					it.first.get().then( [ & ](){
+
+						QMutexLocker m( &m_mutex ) ;
+
+						Q_UNUSED( m ) ;
+
+						m_counter++ ;
+
+						it.second() ;
+
+						if( m_counter == m_tasks.size() ){
+
+							m_function() ;
+
+							this->deleteLater() ;
+						}
+					} ) ;
 				}
 			}else{
 				m_start() ;
@@ -284,31 +302,17 @@ namespace Task
 			}
 		}
 	private:
-		void done()
-		{
-			QMutexLocker m( &m_mutex ) ;
-
-			Q_UNUSED( m ) ;
-
-			m_counter++ ;
-
-			if( m_counter == m_tasks.size() ){
-
-				this->run() ;
-
-				this->deleteLater() ;
-			}
-		}
-
 		QThread * m_thread = nullptr ;
 
 		std::function< void() > m_function = [](){} ;
-		std::function< void() > m_start = [](){} ;
-		std::function< void() > m_cancel = [](){} ;
-		std::function< void() > m_get = [](){} ;
+		std::function< void() > m_start    = [](){} ;
+		std::function< void() > m_cancel   = [](){} ;
+		std::function< void() > m_get      = [](){} ;
 
 		QMutex m_mutex ;
-		std::vector< std::reference_wrapper< Task::future< void > > > m_tasks ;
+		using reference_t = std::reference_wrapper< Task::future< void > > ;
+
+		std::vector< std::pair< reference_t,std::function< void() > > > m_tasks ;
 		decltype( m_tasks.size() ) m_counter = 0 ;
 	};
 
@@ -370,6 +374,8 @@ namespace Task
 		return Task::run< void >( std::bind( std::move( function ),std::move( args ) ... ) ) ;
 	}
 
+	using pair = std::pair< std::function< void() >,std::function< void() > > ;
+
 	/*
 	 * -------------------------Start internal helper functions-------------------------
 	 */
@@ -379,6 +385,11 @@ namespace Task
 	}
 
 	static inline void _private_add_future( Task::future< void >& f )
+	{
+		Q_UNUSED( f ) ;
+	}
+
+	static inline void _private_add_pair( Task::future< void >& f )
 	{
 		Q_UNUSED( f ) ;
 	}
@@ -395,6 +406,13 @@ namespace Task
 	{
 		f.add_task( e ) ;
 		_private_add_future( f,std::forward<T>( t ) ... ) ;
+	}
+
+	template< typename ... T >
+	void _private_add_pair( Task::future< void >& f,pair&& s,T&& ... t )
+	{
+		f.add_task( Task::run< void >( std::move( s.first ) ),std::move( s.second ) ) ;
+		_private_add_pair( f,std::forward<T>( t ) ... ) ;
 	}
 	/*
 	 * -------------------------End internal helper functions-------------------------
@@ -417,6 +435,17 @@ namespace Task
 
 		_private_add_future( e,s ) ;
 		_private_add_future( e,std::forward<T>( t ) ... ) ;
+
+		return e ;
+	}
+
+	template< typename ... T >
+	Task::future< void >& run( pair s,T ... t )
+	{
+		auto& e = *( new Task::future< void >() ) ;
+
+		_private_add_pair( e,std::move( s ) ) ;
+		_private_add_pair( e,std::move( t ) ... ) ;
 
 		return e ;
 	}
@@ -605,6 +634,25 @@ Task::future<void>& e = Task::run( f1,f2,f3 ) ;
 
 1.0 .await() can then be called on the future to wait for all tasks to finish before continuing.
 2.0 .then()  can then be called on the future to invoke a callback on the current thread when all tasks finish.
+
+*******************************************************************
+* Example use cases on how to run multiple tasks and their continuations
+* and wait for all to finish before continuing
+*******************************************************************
+
+auto fn1 = [](){} ;
+auto fn2 = [](){} ;
+auto fn3 = [](){} ;
+
+auto r1 = [](){ std::cout << "r1" << std::endl ; } ;
+auto r2 = [](){ std::cout << "r2" << std::endl ; } ;
+auto r3 = [](){ std::cout << "r3" << std::endl ; } ;
+
+Task::future<void>& e = Task::run( Task::pair{ fn1,r1 },
+				   Task::pair{ fn2,r2 },
+				   Task::pair{ fn3,r3 } ) ;
+
+e.await() ;
 
 #endif //end example block
 
