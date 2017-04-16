@@ -42,4 +42,4 @@ A short tutorial on task/async/await as implemented in C# can be viewed from thi
 
 [1] https://github.com/mhogomchungu/tasks/blob/master/example.cpp
 
-[2] https://github.com/mhogomchungu/tasks/blob/333d9840ac2e51bd82ff2f78de445a8cbd18051d/task.h#L513
+[2] https://github.com/mhogomchungu/tasks/blob/0bd4fd227aa4f13bba25dff74df06719ada6317d/task.h#L598

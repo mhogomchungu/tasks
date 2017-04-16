@@ -134,9 +134,19 @@ namespace Task
 		}
 		T get()
 		{
-			T r ;
-			m_get( r ) ;
-			return r ;
+			if( m_tasks.size() > 0 ){
+
+				for( auto& it : m_tasks ){
+
+					it.first.get().get() ;
+				}
+
+				return T() ;
+			}else{
+				T r ;
+				m_get( r ) ;
+				return r ;
+			}
 		}
 		T await()
 		{
@@ -191,7 +201,12 @@ namespace Task
 		}
 		void cancel()
 		{
-			m_cancel() ;
+			if( m_tasks.size() > 0 ){
+
+				this->deleteLater() ;
+			}else{
+				m_cancel() ;
+			}
 		}
 		/*
 		 * ----------------End of public API----------------
@@ -230,10 +245,10 @@ namespace Task
 	private:
 		QThread * m_thread ;
 		std::function< void( T ) > m_function = []( T&& t ){ Q_UNUSED( t ) ; } ;
-		std::function< void() > m_function_1 = nullptr ;
-		std::function< void() > m_start ;
-		std::function< void() > m_cancel ;
-		std::function< void( T& ) > m_get ;
+		std::function< void() > m_function_1  = nullptr ;
+		std::function< void() > m_start       = [](){} ;
+		std::function< void() > m_cancel      = [](){} ;
+		std::function< void( T& ) > m_get     = []( T& e ){ Q_UNUSED( e ) ; } ;
 
 		QMutex m_mutex ;
 		using reference_t = std::reference_wrapper< Task::future< T > > ;
@@ -535,6 +550,7 @@ namespace Task
 
 		return e ;
 	}
+
 	/*
 	 *
 	 * A few useful helper functions
