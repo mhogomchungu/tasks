@@ -175,9 +175,9 @@ static void _testing_task_future_all()
  * 3. On completion of each task,run its continuation on the current thread.
  * 4. Returns a future that holds all above tasks.
  * 5. .await() can be called on the future to suspend the current thread at a point
- *    where this medhod is called to wait for all tasks to finish.
+ *    where this medhod is called to wait for all tasks and their continuations to finish.
  * 6. .then() can be called on the future to register an event to be called when all
- *    tasks finish running.
+ *    tasks and their continuations finish.
  */
 static void _testing_multiple_tasks()
 {
@@ -199,8 +199,8 @@ static void _testing_multiple_tasks()
 
 	std::cout<< "Testing multiple tasks with continuation arguments" << std::endl ;
 
-	auto fn1 = [](){ _printThreadID(); return 0 ;} ;
-	auto fn2 = [](){ _printThreadID(); return 0 ;} ;
+	auto fn1 = [](){ _printThreadID(); return 0 ; } ;
+	auto fn2 = [](){ _printThreadID(); return 0 ; } ;
 	auto fn3 = [](){ _printThreadID(); return 0 ; } ;
 
 	auto r1 = []( int ){ std::cout << "r1" << std::endl ; } ;
@@ -211,9 +211,8 @@ static void _testing_multiple_tasks()
 					   Task::pair<int>{ fn2,r2 },
 					   Task::pair<int>{ fn3,r3 } ) ;
 
-	s.then( [](){ QCoreApplication::quit() ;} ) ;
+	s.then( [](){ QCoreApplication::quit() ; } ) ;
 }
-
 
 void example::run()
 {

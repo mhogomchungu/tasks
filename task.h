@@ -1,4 +1,4 @@
-﻿/*
+/*
  * copyright: 2014-2017
  * name : Francis Banyikwa
  * email: mhogomchungu@gmail.com
@@ -162,39 +162,15 @@ namespace Task
 
 			return q ;
 		}
-		QThread& thread()
+		QThread * thread()
 		{
-			return *m_thread ;
+			return m_thread ;
 		}
 		void start()
 		{
 			if( m_tasks.size() > 0 ){
 
-				for( auto& it : m_tasks ){
-
-					it.first.get().then( [ & ]( T&& e ){
-
-						QMutexLocker m( &m_mutex ) ;
-
-						Q_UNUSED( m ) ;
-
-						m_counter++ ;
-
-						it.second( std::move( e ) ) ;
-
-						if( m_counter == m_tasks.size() ){
-
-							if( m_function_1 != nullptr ){
-
-								m_function_1() ;
-							}else{
-								m_function( T() ) ;
-							}
-
-							this->deleteLater() ;
-						}
-					} ) ;
-				}
+				this->_start() ;
 			}else{
 				m_start() ;
 			}
@@ -243,7 +219,36 @@ namespace Task
 			m_tasks.emplace_back( pair_t{ e,std::move( s ) } ) ;
 		}
 	private:
-		QThread * m_thread ;
+		void _start()
+		{
+			for( auto& it : m_tasks ){
+
+				it.first.get().then( [ & ]( T&& e ){
+
+					QMutexLocker m( &m_mutex ) ;
+
+					Q_UNUSED( m ) ;
+
+					m_counter++ ;
+
+					it.second( std::move( e ) ) ;
+
+					if( m_counter == m_tasks.size() ){
+
+						if( m_function_1 != nullptr ){
+
+							m_function_1() ;
+						}else{
+							m_function( T() ) ;
+						}
+
+						this->deleteLater() ;
+					}
+				} ) ;
+			}
+		}
+
+		QThread * m_thread = nullptr ;
 		std::function< void( T ) > m_function = []( T&& t ){ Q_UNUSED( t ) ; } ;
 		std::function< void() > m_function_1  = nullptr ;
 		std::function< void() > m_start       = [](){} ;
@@ -291,34 +296,15 @@ namespace Task
 
 			p.exec() ;
 		}
-		QThread& thread()
+		QThread * thread()
 		{
-			return *m_thread ;
+			return m_thread ;
 		}
 		void start()
 		{
 			if( m_tasks.size() > 0 ){
 
-				for( auto& it : m_tasks ){
-
-					it.first.get().then( [ & ](){
-
-						QMutexLocker m( &m_mutex ) ;
-
-						Q_UNUSED( m ) ;
-
-						m_counter++ ;
-
-						it.second() ;
-
-						if( m_counter == m_tasks.size() ){
-
-							m_function() ;
-
-							this->deleteLater() ;
-						}
-					} ) ;
-				}
+				this->_start() ;
 			}else{
 				m_start() ;
 			}
@@ -362,6 +348,30 @@ namespace Task
 			m_function() ;
 		}
 	private:
+		void _start()
+		{
+			for( auto& it : m_tasks ){
+
+				it.first.get().then( [ & ](){
+
+					QMutexLocker m( &m_mutex ) ;
+
+					Q_UNUSED( m ) ;
+
+					m_counter++ ;
+
+					it.second() ;
+
+					if( m_counter == m_tasks.size() ){
+
+						m_function() ;
+
+						this->deleteLater() ;
+					}
+				} ) ;
+			}
+		}
+
 		QThread * m_thread = nullptr ;
 
 		std::function< void() > m_function = [](){} ;
