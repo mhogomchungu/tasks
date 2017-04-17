@@ -475,14 +475,17 @@ namespace Task
 	}
 
 	/*
-	 * -------------------------Start internal helper functions-------------------------
+	 * -------------------------Start of internal helper functions-------------------------
 	 */
-	static inline void _private_add_task( Task::future< void >& f )
+
+	template< typename T >
+	void _private_add_task( Task::future< T >& f )
 	{
 		Q_UNUSED( f ) ;
 	}
 
-	static inline void _private_add_future( Task::future< void >& f )
+	template< typename T >
+	void _private_add_future( Task::future< T >& f )
 	{
 		Q_UNUSED( f ) ;
 	}
@@ -510,17 +513,24 @@ namespace Task
 	template< typename E,typename F,typename ... T >
 	void _private_add_pair( Task::future< E >& f,F&& s,T&& ... t )
 	{
-
 		f.add_task( Task::run< E >( std::move( s.first ) ),std::move( s.second ) ) ;
 		_private_add_pair( f,std::forward<T>( t ) ... ) ;
 	}
+
+	template< typename T >
+	Task::future< T >& _private_get_future()
+	{
+		return *( new Task::future< T >() ) ;
+	}
+
 	/*
-	 * -------------------------End internal helper functions-------------------------
+	 * -------------------------End of internal helper functions-------------------------
 	 */
+
 	template< typename ... T >
 	Task::future< void >& run( std::function< void() > f,T ... t )
 	{
-		auto& e = *( new Task::future< void >() ) ;
+		auto& e = _private_get_future< void >() ;
 
 		_private_add_task( e,std::move( f ) ) ;
 		_private_add_task( e,std::move( t ) ... ) ;
@@ -531,7 +541,7 @@ namespace Task
 	template< typename ... T >
 	Task::future< void >& run( Task::future< void >& s,T&& ... t )
 	{
-		auto& e = *( new Task::future< void >() ) ;
+		auto& e = _private_get_future< void >() ;
 
 		_private_add_future( e,s ) ;
 		_private_add_future( e,std::forward<T>( t ) ... ) ;
@@ -539,10 +549,10 @@ namespace Task
 		return e ;
 	}
 
-	template< typename E,typename ... T >
-	Task::future< E >& run( pair< E > s,T ... t )
+	template< typename ... T >
+	Task::future< void >& run( void_pair s,T ... t )
 	{
-		auto& e = *( new Task::future< E >() ) ;
+		auto& e = _private_get_future< void >() ;
 
 		_private_add_pair( e,std::move( s ) ) ;
 		_private_add_pair( e,std::move( t ) ... ) ;
@@ -550,10 +560,10 @@ namespace Task
 		return e ;
 	}
 
-	template< typename ... T >
-	Task::future< void >& run( void_pair s,T ... t )
+	template< typename E,typename ... T >
+	Task::future< E >& run( pair< E > s,T ... t )
 	{
-		auto& e = *( new Task::future< void >() ) ;
+		auto& e = _private_get_future< E >() ;
 
 		_private_add_pair( e,std::move( s ) ) ;
 		_private_add_pair( e,std::move( t ) ... ) ;

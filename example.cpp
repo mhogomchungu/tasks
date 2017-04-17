@@ -113,7 +113,7 @@ static void _test_run_then()
  * 2. creates a new thread.
  * 3. runs the _longRunningTask method in the new thread.
  * 4. store the result of  _longRunningTask function in r.
- * 5. resumes "_testing_task_await" method method.
+ * 5. resumes "_testing_task_await" method.
  */
 static void _testing_task_await()
 {
@@ -141,9 +141,9 @@ static void _testing_task_await()
  */
 static void _testing_task_future_all()
 {
-	auto fn1 = [](){ _printThreadID(); } ;
-	auto fn2 = [](){ _printThreadID(); } ;
-	auto fn3 = [](){ _printThreadID(); } ;
+	auto fn1 = [](){ _printThreadID() ; } ;
+	auto fn2 = [](){ _printThreadID() ; } ;
+	auto fn3 = [](){ _printThreadID() ; } ;
 
 	std::cout<< "Testing Task::run().await() multiple tasks" << std::endl ;
 
@@ -199,17 +199,17 @@ static void _testing_multiple_tasks()
 
 	std::cout<< "Testing multiple tasks with continuation arguments" << std::endl ;
 
-	auto fn1 = [](){ _printThreadID(); return 0 ; } ;
-	auto fn2 = [](){ _printThreadID(); return 0 ; } ;
-	auto fn3 = [](){ _printThreadID(); return 0 ; } ;
+	auto fn1 = [](){ _printThreadID() ; return 0 ; } ;
+	auto fn2 = [](){ _printThreadID() ; return 0 ; } ;
+	auto fn3 = [](){ _printThreadID() ; return 0 ; } ;
 
 	auto r1 = []( int ){ std::cout << "r1" << std::endl ; } ;
 	auto r2 = []( int ){ std::cout << "r2" << std::endl ; } ;
 	auto r3 = []( int ){ std::cout << "r3" << std::endl ; } ;
 
-	Task::future<int>& s = Task::run(  Task::pair<int>{ fn1,r1 },
-					   Task::pair<int>{ fn2,r2 },
-					   Task::pair<int>{ fn3,r3 } ) ;
+	Task::future<int>& s = Task::run( Task::pair<int>{ fn1,r1 },
+					  Task::pair<int>{ fn2,r2 },
+					  Task::pair<int>{ fn3,r3 } ) ;
 
 	s.then( [](){ QCoreApplication::quit() ; } ) ;
 }
