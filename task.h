@@ -214,9 +214,7 @@ namespace Task
 		}
 		void add_task( Task::future< T >& e,std::function< void( T ) > s = []( T e ){ Q_UNUSED( e ) ; } )
 		{
-			using reference_t = std::reference_wrapper< Task::future< T > > ;
-			using pair_t = std::pair< reference_t,std::function< void( T ) > > ;
-			m_tasks.emplace_back( pair_t{ e,std::move( s ) } ) ;
+			m_tasks.emplace_back( e,std::move( s ) ) ;
 		}
 	private:
 		void _start()
@@ -339,9 +337,7 @@ namespace Task
 		}
 		void add_task( Task::future< void >& e,std::function< void() > s = [](){} )
 		{
-			using reference_t = std::reference_wrapper< Task::future< void > > ;
-			using pair_t = std::pair< reference_t,std::function< void() > > ;
-			m_tasks.emplace_back( pair_t{ e,std::move( s ) } ) ;
+			m_tasks.emplace_back( e,std::move( s ) ) ;
 		}
 		void run()
 		{
