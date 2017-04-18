@@ -1,6 +1,7 @@
 
 
 Asynchronous programming in Qt/C++ using tasks,continuations and resumable functions.
+========
 
 The project seeks to do async based programming in Qt/C++ using modern C++ with lambdas.
 
@@ -33,6 +34,13 @@ can be retrieved through the future's 3 public methods:
             The suspension at step 1 is done without blocking the thread and hence the
             suspension can be done in the GUI thread and the GUI will remain responsive.
 
+4. .cancel() This is an additional API that can be used to cancel a future. It is important to know that
+             this method does not terminate a running thread that is powering a future, it just releases
+	     memory used by a future and this method should be used if a future is to be discarded after it
+	     it is accured but never used.
+
+5. .thread() This is an additional API and it returns a pointer to a thread that is powering a future. This pointer
+             coud be a nullptr and it is owned by the future object and should NOT be deleted by users of the API.
 
 Examples of using a future.
 ========
@@ -90,9 +98,9 @@ Examples of creating a future.
 **1. Creating a future that has no result.**
 ```c++
 
-void foo() ; //function prototype
+void bar() ; //function prototype
 
-Task::future<void>& foo = Task::run( foo ) ;
+Task::future<void>& foo = Task::run( bar ) ;
 
 ```
 
@@ -105,7 +113,7 @@ Task::future<int>& foo = Task::run<int>( foo ) ;
 
 ```
 
-**3. Creating a future that combines multiple functions.Each function will run in its own thread concurrently.**
+**3. Creating a future that combines multiple functions. Each function will run in its own thread concurrently.**
 
 ```c++
 
@@ -116,7 +124,7 @@ Task::future<int>& foo = Task::run<int>( foo,bar ) ;
 
 ```
 
-**3. Creating a future that combines multiple futures.Each future will run in its own thread concurrently.**
+**3. Creating a future that combines multiple futures. Each future will run in its own thread concurrently.**
 
 ```c++
 
@@ -127,7 +135,7 @@ Task::future<int>& foo = Task::run<int>( foo,bar ) ;
 
 ```
 
-**4. Creating a future that combines multiple tasks and their continuations that take no argument.Each task will run in its own thread concurrently.**
+**4. Creating a future that combines multiple tasks and their continuations that take no argument. Each task will run in its own thread concurrently.**
 ```c++
 
 void foo() ; //function prototype
@@ -141,7 +149,7 @@ Task::future<void>& e = Task::run( Task::void_pair{ foo,foo_continuation },
 
 ```
 
-**5. Creating a future that combines multiple tasks and their continuations that takes an argument.Each task will run in its own thread concurrently.The result of the future is undefined and a function that takes no argument should be used if .await() method of the future is called.**
+**5. Creating a future that combines multiple tasks and their continuations that takes an argument. Each task will run in its own thread concurrently. The result of the future is undefined and a function that takes no argument should be used if .await() method of the future is called.**
 ```c++
 
 int foo() ; //function prototype
