@@ -141,17 +141,17 @@ Task::future<void>& e = Task::run( Task::void_pair{ foo,foo_continuation },
 
 ```
 
-**5. Creating a future that combines multiple tasks and their continuations that takes an argument.Each task will run in its own thread concurrently.**
+**5. Creating a future that combines multiple tasks and their continuations that takes an argument.Each task will run in its own thread concurrently.The result of the future is undefined and a function that takes no argument should be used if .await() method of the future is called.**
 ```c++
 
-void foo() ; //function prototype
-void bar() ; //function prototype
+int foo() ; //function prototype
+int bar() ; //function prototype
 
-void foo_continuation() ; //function prototype
-void bar_continuation() ; //function prototype
+void foo_continuation( int ) ; //function prototype
+void bar_continuation( int ) ; //function prototype
 
-Task::future<void>& e = Task::run( Task::pair{ foo,foo_continuation },
-				   Task::pair{ bar,bar_continuation } ) ;
+Task::future<int>& e = Task::run( Task::pair<int>{ foo,foo_continuation },
+				  Task::pair<int>{ bar,bar_continuation } ) ;
 ```
 
 Further documentation of how to use the library is here[1] and here[2].
