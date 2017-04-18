@@ -113,7 +113,7 @@ Task::future<int>& foo = Task::run<int>( foo ) ;
 
 ```
 
-**3. Creating a future that combines multiple functions. Each function will run in its own thread concurrently.**
+**3. Creating a future that combines multiple functions. Each function will run in its own thread concurrently. The result of the future is undefined and a function that takes no argument should be used if .await() method of the future is called.**
 
 ```c++
 
@@ -124,7 +124,7 @@ Task::future<int>& foo = Task::run<int>( foo,bar ) ;
 
 ```
 
-**3. Creating a future that combines multiple futures. Each future will run in its own thread concurrently.**
+**3. Creating a future that combines multiple futures. Each future will run in its own thread concurrently. The result of the future is undefined and a function that takes no argument should be used if .await() method of the future is called.**
 
 ```c++
 
