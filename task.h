@@ -179,6 +179,11 @@ namespace Task
 		{
 			if( m_tasks.size() > 0 ){
 
+				for( auto& it : m_tasks ){
+
+					it.first.get().cancel() ;
+				}
+
 				this->deleteLater() ;
 			}else{
 				m_cancel() ;
@@ -310,6 +315,11 @@ namespace Task
 		void cancel()
 		{
 			if( m_tasks.size() > 0 ){
+
+				for( auto& it : m_tasks ){
+
+					it.first.get().cancel() ;
+				}
 
 				this->deleteLater() ;
 			}else{
