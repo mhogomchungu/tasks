@@ -39,6 +39,7 @@
 static void _testing_task_await() ;
 static void _testing_task_future_all() ;
 static void _testing_multiple_tasks() ;
+static void _testing_multiple_tasks_with_start() ;
 
 void example::start()
 {
@@ -211,8 +212,61 @@ static void _testing_multiple_tasks()
 					  Task::pair<int>{ fn2,r2 },
 					  Task::pair<int>{ fn3,r3 } ) ;
 
-	s.then( [](){ QCoreApplication::quit() ; } ) ;
+	s.then( _testing_multiple_tasks_with_start ) ;
 }
+
+static void _testing_multiple_tasks_with_start()
+{
+	std::cout<< "Testing multiple tasks with continuation arguments using start" << std::endl ;
+
+	class counter : public QObject
+	{
+	public:
+		counter( int s,QObject * e ) : QObject( e ),m_max( s )
+		{
+		}
+
+		void count()
+		{
+			QMutexLocker m( &m_mutex ) ;
+			Q_UNUSED( m ) ;
+
+			m_counter++ ;
+
+			if( m_counter == m_max ){
+
+				QCoreApplication::quit() ;
+			}
+		}
+	private:
+		int m_max ;
+		int m_counter = 0 ;
+		QMutex m_mutex ;
+	};
+
+	auto e = new counter( 3,QCoreApplication::instance() ) ;
+
+	auto fn1 = [](){ _printThreadID() ; return 0 ; } ;
+	auto fn2 = [](){ _printThreadID() ; return 0 ; } ;
+	auto fn3 = [](){ _printThreadID() ; return 0 ; } ;
+
+	auto r1 = [ = ]( int ){ std::cout << "r1" << std::endl ; e->count() ; } ;
+	auto r2 = [ = ]( int ){ std::cout << "r2" << std::endl ; e->count() ; } ;
+	auto r3 = [ = ]( int ){ std::cout << "r3" << std::endl ; e->count() ; } ;
+
+	Task::future<int>& s = Task::run( Task::pair<int>{ fn1,r1 },
+					  Task::pair<int>{ fn2,r2 },
+					  Task::pair<int>{ fn3,r3 } ) ;
+
+	s.start() ;
+}
+
+class test
+{
+public:
+	test() = delete ;
+	test(int){}
+};
 
 void example::run()
 {

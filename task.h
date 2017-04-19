@@ -141,11 +141,11 @@ namespace Task
 					it.first.get().get() ;
 				}
 
+				this->deleteLater() ;
+
 				return T() ;
 			}else{
-				T r ;
-				m_get( r ) ;
-				return r ;
+				return m_get() ;
 			}
 		}
 		T await()
@@ -201,7 +201,7 @@ namespace Task
 		future( QThread * e,
 			std::function< void() >&& start,
 			std::function< void() >&& cancel,
-			std::function< void( T& ) >&& get ) :
+			std::function< T() >&& get ) :
 			m_thread( e ),
 			m_start ( std::move( start ) ),
 			m_cancel( std::move( cancel ) ),
@@ -213,7 +213,9 @@ namespace Task
 			if( m_function_1 != nullptr ){
 
 				m_function_1() ;
-			}else{
+
+			}else if( m_function != nullptr ){
+
 				m_function( std::move( r ) ) ;
 			}
 		}
@@ -241,7 +243,9 @@ namespace Task
 						if( m_function_1 != nullptr ){
 
 							m_function_1() ;
-						}else{
+
+						}else if( m_function != nullptr ){
+
 							m_function( T() ) ;
 						}
 
@@ -252,11 +256,11 @@ namespace Task
 		}
 
 		QThread * m_thread = nullptr ;
-		std::function< void( T ) > m_function = []( T&& t ){ Q_UNUSED( t ) ; } ;
+		std::function< void( T ) > m_function = nullptr ;
 		std::function< void() > m_function_1  = nullptr ;
 		std::function< void() > m_start       = [](){} ;
 		std::function< void() > m_cancel      = [](){} ;
-		std::function< void( T& ) > m_get     = []( T& e ){ Q_UNUSED( e ) ; } ;
+		std::function< T() > m_get            = [](){ return T() ; } ;
 
 		QMutex m_mutex ;
 		using reference_t = std::reference_wrapper< Task::future< T > > ;
@@ -285,6 +289,8 @@ namespace Task
 
 					it.first.get().get() ;
 				}
+
+				this->deleteLater() ;
 			}else{
 				m_get() ;
 			}
@@ -401,7 +407,7 @@ namespace Task
 			m_future( this,
 				  [ this ](){ this->start() ; },
 				  [ this ](){ this->deleteLater() ; },
-				  [ this ]( T& r ){ r = m_function() ; this->deleteLater() ; } )
+				  [ this ](){ this->deleteLater() ; return m_function() ; } )
 		{
 		}
 		future<T>& Future()
