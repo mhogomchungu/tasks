@@ -34,16 +34,21 @@ can be retrieved through the future's 3 public methods:
             The suspension at step 1 is done without blocking the thread and hence the
             suspension can be done in the GUI thread and the GUI will remain responsive.
 
-4. .cancel(). This is an additional API that can be used to cancel a future. It is important to know that
+4. .queue(). This method runs tasks in a future sequentially and a passed in function will be called when all tasks
+	     finish running. This method behaves like .then( [](){} ) if the future is managing only one task.
+
+5. .cancel(). This is an additional API that can be used to cancel a future. It is important to know that
               this method does not terminate a running thread that is powering a future, it just releases
 	      memory used by a future and this method should be used if a future is to be discarded after it
 	      it is accured but never used.
 
-5. .thread(). This is an additional API and it returns a pointer to a thread that is powering a future. This pointer
+6. .thread(). This is an additional API and it returns a pointer to a thread that is powering a future. This pointer
               coud be a nullptr and it is owned by the future object and should NOT be deleted by users of the API.
 
-6. .start(). This is an additional API and it is to be used if a future is to be run without caring about its result.
+7. .start(). This is an additional API and it is to be used if a future is to be run without caring about its result.
 	     Use this API if you want a future to run but dont want to use .get(),.await() or .then() methods.
+
+
 
 Examples of using a future.
 ========
@@ -86,6 +91,18 @@ void meaw( int ) ; //function prototype
 Task::future<int>& foo = bar() ;
 
 foo.then( meaw ) ;
+
+```
+
+**3. Example use of .queue() method of a future.**
+
+```c++
+
+int meaw() ; //function prototype
+
+Task::future<int>& foo = bar() ;//function prototype
+
+foo.queue( meaw ) ;
 
 ```
 

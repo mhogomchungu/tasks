@@ -132,6 +132,17 @@ namespace Task
 			m_function_1 = std::move( function ) ;
 			this->start() ;
 		}
+		void queue( std::function< void() > function = [](){} )
+		{
+			if( m_tasks.size() == 0 ){
+
+				this->then( std::move( function ) ) ;
+			}else{
+				m_function_1 = std::move( function ) ;
+
+				this->_queue() ;
+			}
+		}
 		T get()
 		{
 			if( m_tasks.size() > 0 ){
@@ -224,6 +235,24 @@ namespace Task
 			m_tasks.emplace_back( e,std::move( s ) ) ;
 		}
 	private:
+		void _queue()
+		{
+			m_tasks[ m_counter ].first.get().then( [ this ]( T&& e ){
+
+				m_tasks[ m_counter ].second( std::move( e ) ) ;
+
+				m_counter++ ;
+
+				if( m_counter == m_tasks.size() ){
+
+					m_function_1() ;
+
+					this->deleteLater() ;
+				}else{
+					this->_queue() ;
+				}
+			} ) ;
+		}
 		void _start()
 		{
 			for( auto& it : m_tasks ){
@@ -332,6 +361,17 @@ namespace Task
 				m_cancel() ;
 			}
 		}
+		void queue( std::function< void() > function = [](){} )
+		{
+			if( m_tasks.size() == 0 ){
+
+				this->then( std::move( function ) ) ;
+			}else{
+				m_function = std::move( function ) ;
+
+				this->_queue() ;
+			}
+		}
 		/*
 		 * ----------------End of public API----------------
 		 */
@@ -360,6 +400,25 @@ namespace Task
 			m_function() ;
 		}
 	private:
+		void _queue()
+		{
+			m_tasks[ m_counter ].first.get().then( [ this ](){
+
+				m_tasks[ m_counter ].second() ;
+
+				m_counter++ ;
+
+				if( m_counter == m_tasks.size() ){
+
+					m_function() ;
+
+					this->deleteLater() ;
+				}else{
+					this->_queue() ;
+				}
+			} ) ;
+		}
+
 		void _start()
 		{
 			for( auto& it : m_tasks ){

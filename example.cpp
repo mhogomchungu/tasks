@@ -40,6 +40,8 @@ static void _testing_task_await() ;
 static void _testing_task_future_all() ;
 static void _testing_multiple_tasks() ;
 static void _testing_multiple_tasks_with_start() ;
+static void _testing_queue_with_no_results() ;
+static void _testing_queue_with_results() ;
 
 void example::start()
 {
@@ -118,7 +120,7 @@ static void _test_run_then()
  */
 static void _testing_task_await()
 {
-	std::cout<< "Testing Task::run().then()" << std::endl ;
+	std::cout<< "Testing Task::await()" << std::endl ;
 
 	QString e = Task::await<QString>( _longRunningTask ) ;
 
@@ -261,15 +263,44 @@ static void _testing_multiple_tasks_with_start()
 	s.start() ;
 }
 
-class test
+static void _testing_queue_with_no_results()
 {
-public:
-	test() = delete ;
-	test(int){}
-};
+	std::cout<< "Testing queue with no result" << std::endl ;
+
+	auto fna1 = [](){ _printThreadID(); } ;
+	auto fna2 = [](){ _printThreadID(); } ;
+	auto fna3 = [](){ _printThreadID(); } ;
+
+	auto ra1 = [](){ std::cout << "r1" << std::endl ; } ;
+	auto ra2 = [](){ std::cout << "r2" << std::endl ; } ;
+	auto ra3 = [](){ std::cout << "r3" << std::endl ; } ;
+
+	Task::future<void>& e = Task::run( Task::void_pair{ fna1,ra1 },
+					   Task::void_pair{ fna2,ra2 },
+					   Task::void_pair{ fna3,ra3 } ) ;
+
+	e.queue( _testing_queue_with_results ) ;
+}
+
+static void _testing_queue_with_results()
+{
+	std::cout<< "Testing queue with result" << std::endl ;
+
+	auto fn1 = [](){ _printThreadID() ; return 0 ; } ;
+	auto fn2 = [](){ _printThreadID() ; return 0 ; } ;
+	auto fn3 = [](){ _printThreadID() ; return 0 ; } ;
+
+	auto r1 = [ = ]( int ){ std::cout << "r1" << std::endl ; } ;
+	auto r2 = [ = ]( int ){ std::cout << "r2" << std::endl ; } ;
+	auto r3 = [ = ]( int ){ std::cout << "r3" << std::endl ; } ;
+
+	Task::future<int>& s = Task::run( Task::pair<int>{ fn1,r1 },
+					  Task::pair<int>{ fn2,r2 },
+					  Task::pair<int>{ fn3,r3 } ) ;
+	s.queue( _test_run_then ) ;
+}
 
 void example::run()
 {
-	_test_run_then() ;
+	_testing_queue_with_no_results() ;
 }
-
