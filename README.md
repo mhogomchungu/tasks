@@ -3,16 +3,16 @@
 Asynchronous programming in Qt/C++ using tasks,continuations and resumable functions.
 ========
 
-The project seeks to do async based programming in Qt/C++ using modern C++ with lambdas.
+The project seeks to do async based programming in Qt/C++ using modern C++.
 
 This library wraps a function into a future where the result of the wrapped function
 can be retrieved through the future's 3 public methods:
 
-1. .get()  This method runs the wrapped function on the current thread
-           and could block the thread and hang GUI. This API is useful when you are already
-           in a background thread.
+1. .get().  This method runs the wrapped function on the current thread
+            and could block the thread and hang GUI. This API is useful when you are already
+            in a background thread.
 
-2. .then() This method does three things:
+2. .then(). This method does three things:
 
             1. Registers a method to be called when a wrapped function finish running.
 
@@ -21,7 +21,7 @@ can be retrieved through the future's 3 public methods:
             3. Runs the registered method on the current thread when the wrapped
                function finish running.
 
-3. .await() This method does three things:
+3. .await(). This method does three things:
 
             1. Suspends the current thread at a point where this method is called.
 
@@ -34,13 +34,13 @@ can be retrieved through the future's 3 public methods:
             The suspension at step 1 is done without blocking the thread and hence the
             suspension can be done in the GUI thread and the GUI will remain responsive.
 
-4. .cancel() This is an additional API that can be used to cancel a future. It is important to know that
-             this method does not terminate a running thread that is powering a future, it just releases
-	     memory used by a future and this method should be used if a future is to be discarded after it
-	     it is accured but never used.
+4. .cancel(). This is an additional API that can be used to cancel a future. It is important to know that
+              this method does not terminate a running thread that is powering a future, it just releases
+	      memory used by a future and this method should be used if a future is to be discarded after it
+	      it is accured but never used.
 
-5. .thread() This is an additional API and it returns a pointer to a thread that is powering a future. This pointer
-             coud be a nullptr and it is owned by the future object and should NOT be deleted by users of the API.
+5. .thread(). This is an additional API and it returns a pointer to a thread that is powering a future. This pointer
+              coud be a nullptr and it is owned by the future object and should NOT be deleted by users of the API.
 
 Examples of using a future.
 ========
@@ -53,8 +53,6 @@ Task::future<int>& foo = bar() ;
 
 int r = foo.get() ;
 
-std::cout << r << "\n" ;
-
 ```
 
 **2. Example use of .await() method of a future.**
@@ -65,8 +63,6 @@ Task::future<int>& foo = bar() ;
 
 int r = foo.await() ;
 
-std::cout << r << "\n" ;
-
 ```
 **2. Example use an alternative use of .await() method of a future.**
 
@@ -75,8 +71,6 @@ std::cout << r << "\n" ;
 int foo() ; //function prototype
 
 int r = Task::await<int>( foo ) ;
-
-std::cout << r << "\n" ;
 
 ```
 
@@ -141,11 +135,11 @@ Task::future<int>& foo = Task::run<int>( foo,bar ) ;
 void foo() ; //function prototype
 void bar() ; //function prototype
 
-void foo_continuation() ; //function prototype
-void bar_continuation() ; //function prototype
+void cfoo() ; //function prototype
+void cbar() ; //function prototype
 
-Task::future<void>& e = Task::run( Task::void_pair{ foo,foo_continuation },
-				   Task::void_pair{ bar,bar_continuation } ) ;
+Task::future<void>& e = Task::run( Task::void_pair{ foo,cfoo },
+				   Task::void_pair{ bar,cbar } ) ;
 
 ```
 
@@ -155,11 +149,11 @@ Task::future<void>& e = Task::run( Task::void_pair{ foo,foo_continuation },
 int foo() ; //function prototype
 int bar() ; //function prototype
 
-void foo_continuation( int ) ; //function prototype
-void bar_continuation( int ) ; //function prototype
+void cfoo( int ) ; //function prototype
+void cbar( int ) ; //function prototype
 
-Task::future<int>& e = Task::run( Task::pair<int>{ foo,foo_continuation },
-				  Task::pair<int>{ bar,bar_continuation } ) ;
+Task::future<int>& e = Task::run( Task::pair<int>{ foo,cfoo },
+				  Task::pair<int>{ bar,cbar } ) ;
 ```
 
 Further documentation of how to use the library is here[1] and here[2].
