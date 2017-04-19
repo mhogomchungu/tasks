@@ -98,7 +98,7 @@ foo.then( meaw ) ;
 
 ```c++
 
-int meaw() ; //function prototype
+void meaw() ; //function prototype
 
 Task::future<int>& foo = bar() ;//function prototype
 
