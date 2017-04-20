@@ -134,18 +134,18 @@ namespace Task
 		}
 		void queue( std::function< void() > function = [](){} )
 		{
-			if( m_tasks.size() == 0 ){
+			if( this->_multiple_futures() ){
 
-				this->then( std::move( function ) ) ;
-			}else{
 				m_function_1 = std::move( function ) ;
 
 				this->_queue() ;
+			}else{
+				this->then( std::move( function ) ) ;
 			}
 		}
 		T get()
 		{
-			if( m_tasks.size() > 0 ){
+			if( this->_multiple_futures() ){
 
 				for( auto& it : m_tasks ){
 
@@ -179,7 +179,7 @@ namespace Task
 		}
 		void start()
 		{
-			if( m_tasks.size() > 0 ){
+			if( this->_multiple_futures() ){
 
 				this->_start() ;
 			}else{
@@ -188,7 +188,7 @@ namespace Task
 		}
 		void cancel()
 		{
-			if( m_tasks.size() > 0 ){
+			if( this->_multiple_futures() ){
 
 				for( auto& it : m_tasks ){
 
@@ -235,6 +235,10 @@ namespace Task
 			m_tasks.emplace_back( std::addressof( e ),std::move( s ) ) ;
 		}
 	private:
+		bool _multiple_futures()
+		{
+			return m_tasks.size() > 0 ;
+		}
 		void _queue()
 		{
 			m_tasks[ m_counter ].first->then( [ this ]( T&& e ){
@@ -310,7 +314,7 @@ namespace Task
 		}
 		void get()
 		{
-			if( m_tasks.size() > 0 ){
+			if( this->_multiple_futures() ){
 
 				for( auto& it : m_tasks ){
 
@@ -339,7 +343,7 @@ namespace Task
 		}
 		void start()
 		{
-			if( m_tasks.size() > 0 ){
+			if( this->_multiple_futures() ){
 
 				this->_start() ;
 			}else{
@@ -348,7 +352,7 @@ namespace Task
 		}
 		void cancel()
 		{
-			if( m_tasks.size() > 0 ){
+			if( this->_multiple_futures() ){
 
 				for( auto& it : m_tasks ){
 
@@ -362,13 +366,13 @@ namespace Task
 		}
 		void queue( std::function< void() > function = [](){} )
 		{
-			if( m_tasks.size() == 0 ){
+			if( this->_multiple_futures() ){
 
-				this->then( std::move( function ) ) ;
-			}else{
 				m_function = std::move( function ) ;
 
 				this->_queue() ;
+			}else{
+				this->then( std::move( function ) ) ;
 			}
 		}
 		/*
@@ -399,6 +403,10 @@ namespace Task
 			m_function() ;
 		}
 	private:
+		bool _multiple_futures()
+		{
+			return m_tasks.size() > 0 ;
+		}
 		void _queue()
 		{
 			m_tasks[ m_counter ].first->then( [ this ](){
