@@ -149,7 +149,7 @@ namespace Task
 
 				for( auto& it : m_tasks ){
 
-					it.first.get().get() ;
+					it.second( it.first->get() ) ;
 				}
 
 				this->deleteLater() ;
@@ -192,7 +192,7 @@ namespace Task
 
 				for( auto& it : m_tasks ){
 
-					it.first.get().cancel() ;
+					it.first->cancel() ;
 				}
 
 				this->deleteLater() ;
@@ -232,12 +232,12 @@ namespace Task
 		}
 		void add_task( Task::future< T >& e,std::function< void( T ) > s = []( T e ){ Q_UNUSED( e ) ; } )
 		{
-			m_tasks.emplace_back( e,std::move( s ) ) ;
+			m_tasks.emplace_back( std::addressof( e ),std::move( s ) ) ;
 		}
 	private:
 		void _queue()
 		{
-			m_tasks[ m_counter ].first.get().then( [ this ]( T&& e ){
+			m_tasks[ m_counter ].first->then( [ this ]( T&& e ){
 
 				m_tasks[ m_counter ].second( std::move( e ) ) ;
 
@@ -257,7 +257,7 @@ namespace Task
 		{
 			for( auto& it : m_tasks ){
 
-				it.first.get().then( [ & ]( T&& e ){
+				it.first->then( [ & ]( T&& e ){
 
 					QMutexLocker m( &m_mutex ) ;
 
@@ -292,9 +292,7 @@ namespace Task
 		std::function< T() > m_get            = [](){ return T() ; } ;
 
 		QMutex m_mutex ;
-		using reference_t = std::reference_wrapper< Task::future< T > > ;
-
-		std::vector< std::pair< reference_t,std::function< void( T ) > > > m_tasks ;
+		std::vector< std::pair< Task::future< T > *,std::function< void( T ) > > > m_tasks ;
 		decltype( m_tasks.size() ) m_counter = 0 ;
 	};
 
@@ -316,7 +314,8 @@ namespace Task
 
 				for( auto& it : m_tasks ){
 
-					it.first.get().get() ;
+					it.first->get() ;
+					it.second() ;
 				}
 
 				this->deleteLater() ;
@@ -353,7 +352,7 @@ namespace Task
 
 				for( auto& it : m_tasks ){
 
-					it.first.get().cancel() ;
+					it.first->cancel() ;
 				}
 
 				this->deleteLater() ;
@@ -393,7 +392,7 @@ namespace Task
 		}
 		void add_task( Task::future< void >& e,std::function< void() > s = [](){} )
 		{
-			m_tasks.emplace_back( e,std::move( s ) ) ;
+			m_tasks.emplace_back( std::addressof( e ),std::move( s ) ) ;
 		}
 		void run()
 		{
@@ -402,7 +401,7 @@ namespace Task
 	private:
 		void _queue()
 		{
-			m_tasks[ m_counter ].first.get().then( [ this ](){
+			m_tasks[ m_counter ].first->then( [ this ](){
 
 				m_tasks[ m_counter ].second() ;
 
@@ -423,7 +422,7 @@ namespace Task
 		{
 			for( auto& it : m_tasks ){
 
-				it.first.get().then( [ & ](){
+				it.first->then( [ & ](){
 
 					QMutexLocker m( &m_mutex ) ;
 
@@ -451,9 +450,7 @@ namespace Task
 		std::function< void() > m_get      = [](){} ;
 
 		QMutex m_mutex ;
-		using reference_t = std::reference_wrapper< Task::future< void > > ;
-
-		std::vector< std::pair< reference_t,std::function< void() > > > m_tasks ;
+		std::vector< std::pair< Task::future< void > *,std::function< void() > > > m_tasks ;
 		decltype( m_tasks.size() ) m_counter = 0 ;
 	};
 
