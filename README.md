@@ -40,13 +40,13 @@ can be retrieved through the future's 3 public methods:
 5. .cancel(). This is an additional API that can be used to cancel a future. It is important to know that
               this method does not terminate a running thread that is powering a future, it just releases
 	      memory used by a future and this method should be used if a future is to be discarded after it
-	      it is accured but never used.
+	      it is acquired but never used.
 
 6. .thread(). This is an additional API and it returns a pointer to a thread that is powering a future. This pointer
               coud be a nullptr and it is owned by the future object and should NOT be deleted by users of the API.
 
 7. .start(). This is an additional API and it is to be used if a future is to be run without caring about its result.
-	     Use this API if you want a future to run but dont want to use .get(),.await() or .then() methods.
+	     Use this API if you want a future to run but dont want to use any of the above mentioned methods.
 
 
 
