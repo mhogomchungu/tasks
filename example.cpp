@@ -42,6 +42,13 @@ static void _testing_multiple_tasks() ;
 static void _testing_multiple_tasks_with_start() ;
 static void _testing_queue_with_no_results() ;
 static void _testing_queue_with_results() ;
+static void _testing_checking_multiple_futures() ;
+
+template< typename T >
+static void _print( const T& e )
+{
+	std::cout << e << std::endl ;
+}
 
 void example::start()
 {
@@ -120,11 +127,11 @@ static void _test_run_then()
  */
 static void _testing_task_await()
 {
-	std::cout<< "Testing Task::await()" << std::endl ;
+	_print( "Testing Task::await()" ) ;
 
 	QString e = Task::await<QString>( _longRunningTask ) ;
 
-	std::cout << e.toLatin1().constData() << std::endl ;
+	_print( e.toLatin1().constData() ) ;
 
 	/*
 	 * moving on to the next test.
@@ -148,13 +155,13 @@ static void _testing_task_future_all()
 	auto fn2 = [](){ _printThreadID() ; } ;
 	auto fn3 = [](){ _printThreadID() ; } ;
 
-	std::cout<< "Testing Task::run().await() multiple tasks" << std::endl ;
+	_print( "Testing Task::run().await() multiple tasks" ) ;
 
 	Task::future<void>& e = Task::run( fn1,fn2,fn3 ) ;
 
 	e.await() ;
 
-	std::cout<< "Testing Task::run().then() multiple tasks" << std::endl ;
+	_print( "Testing Task::run().then() multiple tasks" ) ;
 
 	Task::future<void>& f1 = Task::run( fn1 ) ;
 	Task::future<void>& f2 = Task::run( fn2 ) ;
@@ -184,15 +191,15 @@ static void _testing_task_future_all()
  */
 static void _testing_multiple_tasks()
 {
-	std::cout<< "Testing multiple tasks without continuation arguments" << std::endl ;
+	_print( "Testing multiple tasks without continuation arguments" ) ;
 
 	auto fna1 = [](){ _printThreadID(); } ;
 	auto fna2 = [](){ _printThreadID(); } ;
 	auto fna3 = [](){ _printThreadID(); } ;
 
-	auto ra1 = [](){ std::cout << "r1" << std::endl ; } ;
-	auto ra2 = [](){ std::cout << "r2" << std::endl ; } ;
-	auto ra3 = [](){ std::cout << "r3" << std::endl ; } ;
+	auto ra1 = [](){ _print( "r1" ) ; } ;
+	auto ra2 = [](){ _print( "r2" ) ; } ;
+	auto ra3 = [](){ _print( "r3" ) ; } ;
 
 	Task::future<void>& e = Task::run( Task::void_pair{ fna1,ra1 },
 					   Task::void_pair{ fna2,ra2 },
@@ -200,15 +207,15 @@ static void _testing_multiple_tasks()
 
 	e.await() ;
 
-	std::cout<< "Testing multiple tasks with continuation arguments" << std::endl ;
+	_print( "Testing multiple tasks with continuation arguments" ) ;
 
 	auto fn1 = [](){ _printThreadID() ; return 0 ; } ;
 	auto fn2 = [](){ _printThreadID() ; return 0 ; } ;
 	auto fn3 = [](){ _printThreadID() ; return 0 ; } ;
 
-	auto r1 = []( int ){ std::cout << "r1" << std::endl ; } ;
-	auto r2 = []( int ){ std::cout << "r2" << std::endl ; } ;
-	auto r3 = []( int ){ std::cout << "r3" << std::endl ; } ;
+	auto r1 = []( int ){ _print( "r1" ) ; } ;
+	auto r2 = []( int ){ _print( "r2" ) ; } ;
+	auto r3 = []( int ){ _print( "r3" ) ; } ;
 
 	Task::future<int>& s = Task::run( Task::pair<int>{ fn1,r1 },
 					  Task::pair<int>{ fn2,r2 },
@@ -252,9 +259,9 @@ static void _testing_multiple_tasks_with_start()
 	auto fn2 = [](){ _printThreadID() ; return 0 ; } ;
 	auto fn3 = [](){ _printThreadID() ; return 0 ; } ;
 
-	auto r1 = [ = ]( int ){ std::cout << "r1" << std::endl ; e->count() ; } ;
-	auto r2 = [ = ]( int ){ std::cout << "r2" << std::endl ; e->count() ; } ;
-	auto r3 = [ = ]( int ){ std::cout << "r3" << std::endl ; e->count() ; } ;
+	auto r1 = [ = ]( int ){ _print( "r1" ) ; e->count() ; } ;
+	auto r2 = [ = ]( int ){ _print( "r2" ) ; e->count() ; } ;
+	auto r3 = [ = ]( int ){ _print( "r3" ) ; e->count() ; } ;
 
 	Task::future<int>& s = Task::run( Task::pair<int>{ fn1,r1 },
 					  Task::pair<int>{ fn2,r2 },
@@ -271,9 +278,9 @@ static void _testing_queue_with_no_results()
 	auto fna2 = [](){ _printThreadID(); } ;
 	auto fna3 = [](){ _printThreadID(); } ;
 
-	auto ra1 = [](){ std::cout << "r1" << std::endl ; } ;
-	auto ra2 = [](){ std::cout << "r2" << std::endl ; } ;
-	auto ra3 = [](){ std::cout << "r3" << std::endl ; } ;
+	auto ra1 = [](){ _print( "r1" ) ; } ;
+	auto ra2 = [](){ _print( "r2" ) ; } ;
+	auto ra3 = [](){ _print( "r3" ) ; } ;
 
 	Task::future<void>& e = Task::run( Task::void_pair{ fna1,ra1 },
 					   Task::void_pair{ fna2,ra2 },
@@ -290,9 +297,9 @@ static void _testing_queue_with_results()
 	auto fn2 = [](){ _printThreadID() ; return 0 ; } ;
 	auto fn3 = [](){ _printThreadID() ; return 0 ; } ;
 
-	auto r1 = [ = ]( int ){ std::cout << "r1" << std::endl ; } ;
-	auto r2 = [ = ]( int ){ std::cout << "r2" << std::endl ; } ;
-	auto r3 = [ = ]( int ){ std::cout << "r3" << std::endl ; } ;
+	auto r1 = [ = ]( int ){ _print( "r1" ) ; } ;
+	auto r2 = [ = ]( int ){ _print( "r2" ) ; } ;
+	auto r3 = [ = ]( int ){ _print( "r3" ) ; } ;
 
 	Task::future<int>& s = Task::run( Task::pair<int>{ fn1,r1 },
 					  Task::pair<int>{ fn2,r2 },
@@ -300,7 +307,27 @@ static void _testing_queue_with_results()
 	s.queue( _test_run_then ) ;
 }
 
+static void _testing_checking_multiple_futures()
+{
+	auto fn1 = [](){} ;
+	auto fn2 = [](){} ;
+	auto fn3 = [](){} ;
+
+	_print( "Testing finding out if a future manages multiple futures" ) ;
+
+	Task::future<void>& e = Task::run( fn1,fn2,fn3 ) ;
+
+	const auto& z = e.threads() ;
+
+	std::string s = e.manages_multiple_futures() ? "true" : "false" ;
+
+	_print( "A future managed multiple futures: " + s ) ;
+	_print( "Number of future managed: " + QString::number( z.size() ).toStdString() ) ;
+}
+
 void example::run()
 {
+	_testing_checking_multiple_futures() ;
+
 	_testing_queue_with_no_results() ;
 }
