@@ -199,7 +199,7 @@ namespace Task
 		{
 			return m_tasks.size() > 0 ;
 		}
-		const std::vector< QThread * > threads()
+		const std::vector< QThread * >& threads()
 		{
 			return m_threads ;
 		}
@@ -375,7 +375,7 @@ namespace Task
 		{
 			return m_tasks.size() > 0 ;
 		}
-		const std::vector< QThread * > threads()
+		const std::vector< QThread * >& threads()
 		{
 			return m_threads ;
 		}
