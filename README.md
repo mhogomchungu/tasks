@@ -6,7 +6,7 @@ Asynchronous programming in Qt/C++ using tasks,continuations and resumable funct
 The project seeks to do async based programming in Qt/C++ using modern C++.
 
 This library wraps a function into a future where the result of the wrapped function
-can be retrieved through the future's 3 public methods:
+can be retrieved through the future's below public methods:
 
 1. .get().  This method runs the wrapped function on the current thread
             and could block the thread and hang GUI. This API is useful when you are already
@@ -37,18 +37,22 @@ can be retrieved through the future's 3 public methods:
 4. .queue(). This method runs tasks in a future sequentially and a passed in function will be called when all tasks
 	     finish running. This method behaves like ```.then( [](){} )``` if the future is managing only one task.
 
-5. .cancel(). This is an additional API that can be used to cancel a future. It is important to know that
-              this method does not terminate a running thread that is powering a future, it just releases
-	      memory used by a future and this method should be used if a future is to be discarded after it
-	      it is acquired but never used.
+5. .cancel(). This method can be used to cancel a future. It is important to know
+              that this method does not terminate a running thread that is powering a future, it just
+              releases memory used by a future and this method should be used if a future is to be discarded
+	      after it it is acquired but never used. To terminate a thread,call .threads() method,locate a QThread
+	      instance you want to terminate and call .terminate() method on the instance.
 
-6. .thread(). This is an additional API and it returns a pointer to a thread that is powering a future. This pointer
-              coud be a nullptr and it is owned by the future object and should NOT be deleted by users of the API.
+6. .threads(). This method returns a vector of QThreads that are powering futures.
+               The vector will contain a single entry if this future powers its own task. If this future
+               manages other futures,then the returned vector will contain QThread pointers that are in
+               the same order as tasks/futures passed to Task::run().
 
 7. .start(). This is an additional API and it is to be used if a future is to be run without caring about its result.
 	     Use this API if you want a future to run but dont want to use any of the above mentioned methods.
 
-
+8. .manages_multiple_futures(). This is an additional API and it can be used to check if a future powers
+                                its own task or manages other futures.
 
 Examples of using a future.
 ========
@@ -178,8 +182,6 @@ Task::future<int>& e = Task::run( Task::pair<int>{ foo,cfoo },
 ```
 
 Further documentation of how to use the library is here[1] and here[2].
-
-A short tutorial on task/async/await as implemented in C# can be viewed from this[8] link.
 
 [1] https://github.com/mhogomchungu/tasks/blob/master/example.cpp
 
