@@ -48,10 +48,10 @@ can be retrieved through the future's below public methods:
                manages other futures,then the returned vector will contain QThread pointers that are in
                the same order as tasks/futures passed to Task::run().
 
-7. .start(). This is an additional API and it is to be used if a future is to be run without caring about its result.
+7. .start(). This method is to be used if a future is to be run without caring about its result.
 	     Use this API if you want a future to run but dont want to use any of the above mentioned methods.
 
-8. .manages_multiple_futures(). This is an additional API and it can be used to check if a future powers
+8. .manages_multiple_futures(). This method can be used to check if a future powers
                                 its own task or manages other futures.
 
 Examples of using a future.
@@ -76,7 +76,7 @@ Task::future<int>& foo = bar() ;
 int r = foo.await() ;
 
 ```
-**2. Example use an alternative use of .await() method of a future.**
+**3. Example use an alternative use of .await() method of a future.**
 
 ```c++
 
@@ -86,7 +86,7 @@ int r = Task::await<int>( foo ) ;
 
 ```
 
-**3. Example use of .then() method of a future.**
+**4. Example use of .then() method of a future.**
 
 ```c++
 
@@ -98,13 +98,13 @@ foo.then( meaw ) ;
 
 ```
 
-**4. Example use of .queue() method of a future.**
+**5. Example use of .queue() method of a future.**
 
 ```c++
 
 void meaw() ; //function prototype
 
-Task::future<int>& foo = bar() ;//function prototype
+Task::future<int>& foo = bar() ;
 
 foo.queue( meaw ) ;
 

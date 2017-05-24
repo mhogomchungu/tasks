@@ -92,7 +92,7 @@
  *              its result. Use this method if you want a future to run but dont want to use any of the above mentioned
  *              methods.
  *
- * 8. .manages_multiple_futures(). This is an additional API and it can be used to check if a future powers
+ * 8. .manages_multiple_futures(). This method can be used to check if a future powers
  *    its own task or manages other futures.
  *
  *
