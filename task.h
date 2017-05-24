@@ -167,7 +167,7 @@ namespace Task
 		}
 		T get()
 		{
-			if( this->_multiple_futures() ){
+			if( this->manages_multiple_futures() ){
 
 				for( auto& it : m_tasks ){
 
@@ -214,7 +214,7 @@ namespace Task
 		}
 		void cancel()
 		{
-			if( this->_multiple_futures() ){
+			if( this->manages_multiple_futures() ){
 
 				for( auto& it : m_tasks ){
 
