@@ -43,10 +43,10 @@ can be retrieved through the future's below public methods:
 	      after it it is acquired but never used. To terminate a thread,call .threads() method,locate a QThread
 	      instance you want to terminate and call .terminate() method on the instance.
 
-6. .threads(). This method returns a vector of QThreads that are powering futures.
-               The vector will contain a single entry if this future powers its own task. If this future
-               manages other futures,then the returned vector will contain QThread pointers that are in
-               the same order as tasks/futures passed to Task::run().
+6. .all_threads(). This method returns a vector of QThreads that are powering futures.
+                   The vector will contain a single entry if this future powers its own task. If this future
+                   manages other futures,then the returned vector will contain QThread pointers that are in
+                   the same order as tasks/futures passed to Task::run().
 
 7. .start(). This method is to be used if a future is to be run without caring about its result.
 	     Use this API if you want a future to run but dont want to use any of the above mentioned methods.
@@ -162,8 +162,7 @@ void bar() ; //function prototype
 void cfoo() ; //function prototype
 void cbar() ; //function prototype
 
-Task::future<void>& e = Task::run( Task::void_pair{ foo,cfoo },
-				   Task::void_pair{ bar,cbar } ) ;
+Task::future<void>& e = Task::run( Task::void_pair{ foo,cfoo },Task::void_pair{ bar,cbar } ) ;
 
 ```
 
@@ -177,8 +176,7 @@ int bar() ; //function prototype
 void cfoo( int ) ; //function prototype
 void cbar( int ) ; //function prototype
 
-Task::future<int>& e = Task::run( Task::pair<int>{ foo,cfoo },
-				  Task::pair<int>{ bar,cbar } ) ;
+Task::future<int>& e = Task::run( Task::pair<int>{ foo,cfoo },Task::pair<int>{ bar,cbar } ) ;
 ```
 
 Further documentation of how to use the library is here[1] and here[2].
