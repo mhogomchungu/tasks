@@ -29,7 +29,7 @@ can be retrieved through the future's below public methods:
                background thread.
 
             3. Unsuspends the current thread when the wrapped function finish and let
-               the thread current continue normally.
+               the current thread continue normally.
 
             The suspension at step 1 is done without blocking the thread and hence the
             suspension can be done in the GUI thread and the GUI will remain responsive.
@@ -40,7 +40,7 @@ can be retrieved through the future's below public methods:
 5. .cancel(). This method can be used to cancel a future. It is important to know
               that this method does not terminate a running thread that is powering a future, it just
               releases memory used by a future and this method should be used if a future is to be discarded
-	      after it it is acquired but never used. To terminate a thread,call .threads() method,locate a QThread
+	      after it it is acquired but never used. To terminate a thread,call .all_threads() method,locate a QThread
 	      instance you want to terminate and call .terminate() method on the instance.
 
 6. .all_threads(). This method returns a vector of QThreads that are powering futures.
