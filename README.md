@@ -82,7 +82,7 @@ int r = foo.await() ;
 
 int foo() ; //function prototype
 
-int r = Task::await<int>( foo ) ;
+int r = Task::await( foo ) ;
 
 ```
 
@@ -127,33 +127,24 @@ Task::future<void>& foo = Task::run( bar ) ;
 
 int foo() ; //function prototype
 
-Task::future<int>& foo = Task::run<int>( foo ) ;
+Task::future<int>& foo = Task::run( foo ) ;
 
 ```
 
-**3. Creating a future that combines multiple functions. .get() and .queue() on the future will cause passed in function to run sequentially and in the order they are specified. .await() and .then() will cause passed in function to run concurrently. The result of the future is undefined and a function that takes no argument should be used if .await() method of the future is called.**
+**3. Creating a future that combines multiple functions. .get() and .queue() on the future will cause passed in function to run sequentially and in the order they are specified. .await() and .then() will cause passed in function to run concurrently.**
 
 ```c++
 
-int foo() ; //function prototype
-int bar() ; //function prototype
+void foo() ; //function prototype
+void bar() ; //function prototype
 
-Task::future<int>& foo = Task::run<int>( foo,bar ) ;
-
-```
-
-**4. Creating a future that combines multiple futures. .get() and .queue() on the future will cause passed in futures to run sequentially and in the order they are specified. .await() and .then() will cause passed in futures to run concurrently. The result of the future is undefined and a function that takes no argument should be used if .await() method of the future is called.**
-
-```c++
-
-Task::future<int>& foo() ; //function prototype
-Task::future<int>& bar() ; //function prototype
-
-Task::future<int>& foo = Task::run<int>( foo,bar ) ;
+Task::future<void>& foo = Task::run( foo,bar ) ;
 
 ```
 
-**5. Creating a future that combines multiple tasks and their continuations that take no argument. .get() and .queue() on the future will cause passed in functions to run sequentially and in the order they are specified. .await() and .then() will cause passed in function to run concurrently.**
+```
+
+**4. Creating a future that combines multiple tasks and their continuations that take no argument. .get() and .queue() on the future will cause passed in functions to run sequentially and in the order they are specified. .await() and .then() will cause passed in function to run concurrently.**
 ```c++
 
 void foo() ; //function prototype
@@ -166,7 +157,7 @@ Task::future<void>& e = Task::run( Task::void_pair{ foo,cfoo },Task::void_pair{ 
 
 ```
 
-**6. Creating a future that combines multiple tasks and their continuations that takes an argument. .get() and .queue() on the future will cause passed in pairs to run sequentially and in the order they are specified. .await() and .then() will cause passed in pairs to run concurrently. The result of the future is undefined and a function that takes no argument should be used if .await() method of the future is called.**
+**5. Creating a future that combines multiple tasks and their continuations that takes an argument. .get() and .queue() on the future will cause passed in pairs to run sequentially and in the order they are specified. .await() and .then() will cause passed in pairs to run concurrently. The result of the future is undefined and a function that takes no argument should be used if .await() method of the future is called.**
 
 ```c++
 
