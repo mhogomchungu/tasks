@@ -595,21 +595,15 @@ namespace Task
 		return ( new ThreadHelper<T>( std::move( function ) ) )->Future() ;
 	}
 
-	template< typename T,typename ... Args >
-	future<T>& run( std::function< T( Args ... ) > function,Args ... args )
+	template< typename Fn,typename ... Args >
+	future<std::result_of_t< Fn(Args...)> >& run( Fn&& function, Args&& ... args )
 	{
-		return Task::run<T>( std::bind( std::move( function ),std::move( args ) ... ) ) ;
+		return Task::run< std::result_of_t< Fn(Args...) > >( std::bind( std::forward<Fn>( function ),std::forward<Args>( args ) ... ) ) ;
 	}
 
 	static inline future< void >& run( std::function< void() > function )
 	{
 		return Task::run< void >( std::move( function ) ) ;
-	}
-
-	template< typename ... Args >
-	future< void >& run( std::function< void( Args ... ) > function,Args ... args )
-	{
-		return Task::run< void >( std::bind( std::move( function ),std::move( args ) ... ) ) ;
 	}
 
 	/*
@@ -764,10 +758,10 @@ namespace Task
 		return Task::run<T>( std::move( function ) ).await() ;
 	}
 
-	template< typename T,typename ... Args >
-	T await( std::function< T( Args ... ) > function,Args ... args )
+	template< typename Fn,typename ... Args >
+	std::result_of_t< Fn(Args...)> await( Fn&& function, Args&& ... args )
 	{
-		return Task::await<T>( std::bind( std::move( function ),std::move( args ) ... ) ) ;
+		return Task::run( std::forward<Fn>( function ),std::forward<Args>( args ) ... ).await() ;
 	}
 
 	static inline void await( std::function< void() > function )
@@ -893,19 +887,7 @@ int r = Task::run<int>( foo ).await() ;
 * Example use cases on how to use lambda that requires an argument
 *******************************************************************
 
-/*
- * declaring "foo_2" with an auto keyword will not be sufficient here
- * and the full std::function<blablabla> is required.
- *
- * For the same reason,just plugging in a lambda that requires arguments
- * into Task::run() will not be sufficent and the plugged in lambda must
- * be casted to std::function<blablabla> for it to compile.
- *
- * Why the above restriction? No idea but i suspect it has to do with
- * variadic template type deduction failing to see something.
- */
-
-std::function< int( int ) > foo_2 = []( int x ){
+auto foo_2 = []( int x ){
 
 	return x + 1 ;
 } ;
