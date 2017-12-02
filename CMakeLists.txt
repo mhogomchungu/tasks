@@ -12,7 +12,7 @@ INCLUDE(CMakeDependentOption)
 
 find_package( Qt5Core REQUIRED )
 
-QT5_WRAP_CPP( MOC task.h example.h )
+QT5_WRAP_CPP( MOC task.hpp example.h )
 
 include_directories( ${Qt5Core_INCLUDE_DIRS} )
 
