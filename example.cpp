@@ -317,7 +317,7 @@ static void _testing_checking_multiple_futures()
 
 	Task::future<void>& e = Task::run( fn1,fn2,fn3 ) ;
 
-	const auto& z = e.threads() ;
+	const auto& z = e.all_threads() ;
 
 	std::string s = e.manages_multiple_futures() ? "true" : "false" ;
 
@@ -375,6 +375,8 @@ void example::run()
 	Task::run( bb,bb ).get() ;
 
 	Task::run( Task::run( cc ),Task::run( cc ) ).get() ;
+
+	_print( Task::process::run( "ls" ).await().stdOut().constData() ) ;
 
 	_testing_checking_multiple_futures() ;
 
