@@ -376,7 +376,7 @@ void example::run()
 
 	Task::run( Task::run( cc ),Task::run( cc ) ).get() ;
 
-	_print( Task::process::run( "ls" ).await().stdOut().constData() ) ;
+	_print( Task::process::run( "ls" ).await().std_out().constData() ) ;
 
 	_testing_checking_multiple_futures() ;
 
