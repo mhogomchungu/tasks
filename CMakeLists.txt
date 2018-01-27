@@ -21,7 +21,7 @@ QT5_WRAP_CPP( MOC_LIBRARY task.hpp )
 
 include_directories( ${Qt5Core_INCLUDE_DIRS} )
 
-if( TASK_INSTALL )
+if( MCHUNGU_TASK_INSTALL )
 
 	add_library( mhogomchungu_task SHARED ${MOC_LIBRARY} )
 	set_target_properties(mhogomchungu_task PROPERTIES SOVERSION "${SO_VERSION}")
@@ -55,7 +55,7 @@ Libs: -L${CMAKE_INSTALL_FULL_LIBDIR} -l${Qt5Core_LIBRARIES}
 Cflags: -I${CMAKE_INSTALL_FULL_INCLUDEDIR}/mhogomchungu
 \n")
 
-if( TASK_INSTALL )
+if( MCHUNGU_TASK_INSTALL )
 	install( FILES ${PROJECT_BINARY_DIR}/mhogomchungu_task.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig/ PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ )
 	install( FILES task.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mhogomchungu )
 	install( TARGETS mhogomchungu_task LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
