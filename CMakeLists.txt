@@ -2,7 +2,7 @@ cmake_minimum_required( VERSION 3.0 )
 
 project( mhogomchungu_task )
 
-set( LIB_VERSION "1.2.3" )
+set( LIB_VERSION "1.2.4" )
 set( SO_VERSION "1.0.0" )
 
 add_definitions( -Wextra -Wall -pedantic -std=c++11 )
@@ -23,7 +23,7 @@ include_directories( ${Qt5Core_INCLUDE_DIRS} )
 
 if( MCHUNGU_TASK_INSTALL )
 	add_library( mhogomchungu_task SHARED ${MOC_LIBRARY} )
-	set_target_properties(mhogomchungu_task PROPERTIES SOVERSION "${SO_VERSION}")
+	set_target_properties( mhogomchungu_task PROPERTIES SOVERSION "${SO_VERSION}" )
 else()
 	add_library( mhogomchungu_task STATIC ${MOC_LIBRARY} )
 endif()
