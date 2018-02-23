@@ -1,11 +1,11 @@
 cmake_minimum_required( VERSION 3.0 )
 
-project( mhogomchungu_task )
+project( tasks )
 
-set( LIB_VERSION "1.2.4" )
+set( LIB_VERSION "1.2.3" )
 set( SO_VERSION "1.0.0" )
 
-add_definitions( -Wextra -Wall -pedantic -std=c++11 )
+add_definitions( -Wextra -Wall -pedantic )
 
 set( CMAKE_CXX_STANDARD 11 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
@@ -22,8 +22,9 @@ QT5_WRAP_CPP( MOC_LIBRARY task.hpp )
 include_directories( ${Qt5Core_INCLUDE_DIRS} )
 
 if( MCHUNGU_TASK_INSTALL )
+
 	add_library( mhogomchungu_task SHARED ${MOC_LIBRARY} )
-	set_target_properties( mhogomchungu_task PROPERTIES SOVERSION "${SO_VERSION}" )
+	set_target_properties(mhogomchungu_task PROPERTIES SOVERSION "${SO_VERSION}")
 else()
 	add_library( mhogomchungu_task STATIC ${MOC_LIBRARY} )
 endif()
@@ -36,7 +37,7 @@ else()
 	set_target_properties( mhogomchungu_task PROPERTIES COMPILE_FLAGS "-Wextra -Wall -s -fPIC -pedantic " )
 endif()
 
-if( MCHUNGU_TASK_DEBUG )
+if( DEBUG )
 	QT5_WRAP_CPP( MOC_EXE example.h )
 	add_executable( example example.cpp main.cpp ${MOC_EXE} )
 	target_link_libraries( example mhogomchungu_task )
@@ -58,13 +59,13 @@ if( MCHUNGU_TASK_INSTALL )
 	install( FILES ${PROJECT_BINARY_DIR}/mhogomchungu_task.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig/ PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ )
 	install( FILES task.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mhogomchungu )
 	install( TARGETS mhogomchungu_task LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
+
+
+	# uninstall target
+	configure_file(
+		"${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+		"${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+		IMMEDIATE @ONLY )
+
+	add_custom_target( uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake )
 endif()
-
-# uninstall target
-configure_file(
-	"${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-	"${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-	IMMEDIATE @ONLY )
-
-add_custom_target( uninstall
-COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake )
