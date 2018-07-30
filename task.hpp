@@ -607,6 +607,12 @@ namespace Task
 	 * -------------------------Start of internal helper functions-------------------------
 	 */
 
+	template< typename Fn >
+	future<typename std::result_of<Fn()>::type>& _run( Fn function )
+	{
+		return ( new ThreadHelper<typename std::result_of<Fn()>::type>( std::move( function ) ) )->Future() ;
+	}
+
 	template< typename T >
 	void _private_add( Task::future< T >& a,Task::future< T >& b,std::function< void( T ) >&& c )
 	{
@@ -648,7 +654,7 @@ namespace Task
 	template< typename ... T >
 	void _private_add_task( Task::future< void >& f,std::function< void() >&& e,T&& ... t )
 	{
-		_private_add_void( f,Task::run( std::move( e ) ),std::function< void() >( [](){} ) ) ;
+		_private_add_void( f,Task::_run( std::move( e ) ),std::function< void() >( [](){} ) ) ;
 
 		_private_add_task( f,std::move( t ) ... ) ;
 	}
@@ -663,7 +669,7 @@ namespace Task
 	template< typename E,typename F,typename ... T >
 	void _private_add_pair( Task::future< E >& f,F&& s,T&& ... t )
 	{
-		_private_add( f,Task::run( std::move( s.first ) ),std::move( s.second ) ) ;
+		_private_add( f,Task::_run( std::move( s.first ) ),std::move( s.second ) ) ;
 
 		_private_add_pair( f,std::forward<T>( t ) ... ) ;
 	}
@@ -671,7 +677,7 @@ namespace Task
 	template< typename F,typename ... T >
 	void _private_add_pair_void( Task::future< void >& f,F&& s,T&& ... t )
 	{
-		_private_add_void( f,Task::run( std::move( s.first ) ),std::move( s.second ) ) ;
+		_private_add_void( f,Task::_run( std::move( s.first ) ),std::move( s.second ) ) ;
 
 		_private_add_pair_void( f,std::forward<T>( t ) ... ) ;
 	}
