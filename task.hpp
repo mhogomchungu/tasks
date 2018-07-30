@@ -594,7 +594,8 @@ namespace Task
 	template< typename Fn >
 	future<typename std::result_of<Fn()>::type>& run( Fn function )
 	{
-		return ( new ThreadHelper<typename std::result_of<Fn()>::type>( std::move( function ) ) )->Future() ;
+		using fn_t = typename std::result_of<Fn()>::type ;
+		return ( new ThreadHelper<fn_t>( std::move( function ) ) )->Future() ;
 	}
 
 	template< typename Fn,typename ... Args >
@@ -610,7 +611,8 @@ namespace Task
 	template< typename Fn >
 	future<typename std::result_of<Fn()>::type>& _run( Fn function )
 	{
-		return ( new ThreadHelper<typename std::result_of<Fn()>::type>( std::move( function ) ) )->Future() ;
+		using fn_t = typename std::result_of<Fn()>::type ;
+		return ( new ThreadHelper<fn_t>( std::move( function ) ) )->Future() ;
 	}
 
 	template< typename T >
