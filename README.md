@@ -76,7 +76,7 @@ Task::future<int>& foo = bar() ;
 int r = foo.await() ;
 
 ```
-**3. Example use an alternative use of .await() method of a future.**
+**3. Example use of an alternative .await() method of a future.**
 
 ```c++
 
@@ -131,42 +131,43 @@ Task::future<int>& foo = Task::run( foo ) ;
 
 ```
 
-**3. Creating a future that combines multiple functions. .get() and .queue() on the future will cause passed in functions to run sequentially and in the order they are specified. .await() and .then() will cause passed in functions to run concurrently.**
+**3. Creating a future that combines arbitrary number of functions. .get() and .queue() on the future will cause passed in functions to run sequentially and in the order they are specified. .await() and .then() will cause passed in functions to run concurrently.**
+
+```c++
+
+void foo() ; //function prototype
+void bar() ; //function prototype
+void woof() ; //function prototype
+
+Task::future<void>& foo = Task::run( foo,bar,woof ) ;
+
+```
+
+**4. Creating a future that combines arbitrary number of tasks and their continuations that take no argument. .get() and .queue() on the future will cause passed in functions to run sequentially and in the order they are specified. .await() and .then() will cause passed in functions to run concurrently.**
 
 ```c++
 
 void foo() ; //function prototype
 void bar() ; //function prototype
 
-Task::future<void>& foo = Task::run( foo,bar ) ;
+void cfoo() ; //continuation function prototype
+void cbar() ; //continuation function prototype
+
+Task::future<void>& e = Task::run( Task::make_pair( foo,cfoo ),Task::make_pair( bar,cbar ) ) ;
 
 ```
 
-**4. Creating a future that combines multiple tasks and their continuations that take no argument. .get() and .queue() on the future will cause passed in functions to run sequentially and in the order they are specified. .await() and .then() will cause passed in functions to run concurrently.**
-
-```c++
-
-void foo() ; //function prototype
-void bar() ; //function prototype
-
-void cfoo() ; //function prototype
-void cbar() ; //function prototype
-
-Task::future<void>& e = Task::run( Task::void_pair{ foo,cfoo },Task::void_pair{ bar,cbar } ) ;
-
-```
-
-**5. Creating a future that combines multiple tasks and their continuations that takes an argument. .get() and .queue() on the future will cause passed in pairs to run sequentially and in the order they are specified. .await() and .then() will cause passed in pairs to run concurrently. The result of the future is undefined and a function that takes no argument should be used if .await() method of the future is called.**
+**5. Creating a future that combines arbitrary number of tasks and their continuations that takes an argument. .get() and .queue() on the future will cause passed in pairs to run sequentially and in the order they are specified. .await() and .then() will cause passed in pairs to run concurrently. The result of the future is undefined and a function that takes no argument should be used if .await() method of the future is called.**
 
 ```c++
 
 int foo() ; //function prototype
 int bar() ; //function prototype
 
-void cfoo( int ) ; //function prototype
-void cbar( int ) ; //function prototype
+void cfoo( int ) ; //continuation function prototype
+void cbar( int ) ; //continuation function prototype
 
-Task::future<int>& e = Task::run( Task::pair<int>{ foo,cfoo },Task::pair<int>{ bar,cbar } ) ;
+Task::future<int>& e = Task::run( Task::make_pair( foo,cfoo ),Task::make_pair( bar,cbar ) ) ;
 ```
 
 Further documentation of how to use the library is here[1] and here[2].

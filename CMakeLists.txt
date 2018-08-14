@@ -2,8 +2,8 @@ cmake_minimum_required( VERSION 3.0 )
 
 project( tasks )
 
-set( LIB_VERSION "1.2.5" )
-set( SO_VERSION "1.1.0" )
+set( LIB_VERSION "1.2.6" )
+set( SO_VERSION "2.0.0" )
 
 add_definitions( -Wextra -Wall -pedantic )
 

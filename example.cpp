@@ -201,9 +201,9 @@ static void _testing_multiple_tasks()
 	auto ra2 = [](){ _print( "r2" ) ; } ;
 	auto ra3 = [](){ _print( "r3" ) ; } ;
 
-	Task::future<void>& e = Task::run( Task::void_pair{ fna1,ra1 },
-					   Task::void_pair{ fna2,ra2 },
-					   Task::void_pair{ fna3,ra3 } ) ;
+	Task::future<void>& e = Task::run( Task::make_pair( fna1,ra1 ),
+					   Task::make_pair( fna2,ra2 ),
+					   Task::make_pair( fna3,ra3 ) ) ;
 
 	e.await() ;
 
@@ -217,9 +217,9 @@ static void _testing_multiple_tasks()
 	auto r2 = []( int ){ _print( "r2" ) ; } ;
 	auto r3 = []( int ){ _print( "r3" ) ; } ;
 
-	Task::future<int>& s = Task::run( Task::pair<int>{ fn1,r1 },
-					  Task::pair<int>{ fn2,r2 },
-					  Task::pair<int>{ fn3,r3 } ) ;
+	Task::future<int>& s = Task::run( Task::make_pair( fn1,r1 ),
+					  Task::make_pair( fn2,r2 ),
+					  Task::make_pair( fn3,r3 ) ) ;
 
 	s.then( _testing_multiple_tasks_with_start ) ;
 }
@@ -263,9 +263,9 @@ static void _testing_multiple_tasks_with_start()
 	auto r2 = [ = ]( int ){ _print( "r2" ) ; e->count() ; } ;
 	auto r3 = [ = ]( int ){ _print( "r3" ) ; e->count() ; } ;
 
-	Task::future<int>& s = Task::run( Task::pair<int>{ fn1,r1 },
-					  Task::pair<int>{ fn2,r2 },
-					  Task::pair<int>{ fn3,r3 } ) ;
+	Task::future<int>& s = Task::run( Task::make_pair( fn1,r1 ),
+					  Task::make_pair( fn2,r2 ),
+					  Task::make_pair( fn3,r3 ) ) ;
 
 	s.start() ;
 }
@@ -282,9 +282,9 @@ static void _testing_queue_with_no_results()
 	auto ra2 = [](){ _print( "r2" ) ; } ;
 	auto ra3 = [](){ _print( "r3" ) ; } ;
 
-	Task::future<void>& e = Task::run( Task::void_pair{ fna1,ra1 },
-					   Task::void_pair{ fna2,ra2 },
-					   Task::void_pair{ fna3,ra3 } ) ;
+	Task::future<void>& e = Task::run( Task::make_pair( fna1,ra1 ),
+					   Task::make_pair( fna2,ra2 ),
+					   Task::make_pair( fna3,ra3 ) ) ;
 
 	e.queue( _testing_queue_with_results ) ;
 }
@@ -301,9 +301,9 @@ static void _testing_queue_with_results()
 	auto r2 = [ = ]( int ){ _print( "r2" ) ; } ;
 	auto r3 = [ = ]( int ){ _print( "r3" ) ; } ;
 
-	Task::future<int>& s = Task::run( Task::pair<int>{ fn1,r1 },
-					  Task::pair<int>{ fn2,r2 },
-					  Task::pair<int>{ fn3,r3 } ) ;
+	Task::future<int>& s = Task::run( Task::make_pair( fn1,r1 ),
+					  Task::make_pair( fn2,r2 ),
+					  Task::make_pair( fn3,r3 ) ) ;
 	s.queue( _test_run_then ) ;
 }
 
