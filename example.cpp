@@ -327,12 +327,12 @@ static void _testing_checking_multiple_futures()
 
 void example::run()
 {
-	auto www = [](int x){
+	auto run_main = []( int x ){
 
 		std::cout << x << ": mm Thread id: " << QThread::currentThreadId() << std::endl ;
 	} ;
 
-	auto mmm = []( const Task::progress& pp ){
+	auto run_bg = []( const Task::progress& pp ){
 
 		for(int i = 0 ; i < 5 ;i++ ){
 			std::cout << i << ": bg Thread id: " << QThread::currentThreadId() << std::endl ;
@@ -343,9 +343,7 @@ void example::run()
 
 	std::cout << "main Thread: " << QThread::currentThreadId() << std::endl ;
 
-	auto& qq = Task::run( this,mmm,www ) ;
-
-	qq.await() ;
+	Task::run( this,run_bg,run_main ).await() ;
 
 	auto aa = []( int x ){ return x ; } ;
 
