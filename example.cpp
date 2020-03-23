@@ -334,7 +334,7 @@ void example::run()
 
 	auto run_bg = []( const Task::progress& pp ){
 
-		for(int i = 0 ; i < 5 ;i++ ){
+		for( int i = 0 ; i < 5 ;i++ ){
 			std::cout << i << ": bg Thread id: " << QThread::currentThreadId() << std::endl ;
 			pp.update( i ) ;
 			QThread::currentThread()->sleep(1);
