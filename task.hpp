@@ -695,6 +695,22 @@ namespace Task
 		{
 			return *( new Task::future< T >() ) ;
 		}
+
+		class progress : public QObject{
+			Q_OBJECT
+		public:
+			template< typename function >
+			progress( QObject * obj,function fn )
+			{
+				connect( this,&progress::setProgress,obj,std::move( fn ) ) ;
+			}
+			void update( int x )
+			{
+				emit setProgress( x ) ;
+			}
+		signals:
+			void setProgress( int ) ;
+		};
 	} //end of detail namespace
 
 
@@ -712,6 +728,30 @@ namespace Task
 	future<typename std::result_of<Fn(Args...)>::type>& run( Fn function,Args ... args )
 	{
 		return Task::run( std::bind( std::move( function ),std::move( args ) ... ) ) ;
+	}
+
+	class progress{
+	public:
+		template< typename function >
+		progress( QObject * obj,function fn ) :
+			m_progress( new detail::progress( obj,std::move( fn ) ) )
+		{
+		}		
+		void update( int progress ) const
+		{
+			m_progress->update( progress ) ;
+		}
+	private:
+		std::unique_ptr<detail::progress> m_progress ;
+	};
+
+	template< typename Fn,typename cb >
+	future<typename std::result_of<Fn( const progress& )>::type>& run( QObject * obj,Fn function,cb rp )
+	{
+		return Task::run( [ obj,rp = std::move( rp ),function = std::move( function ) ](){
+
+			return function( progress( obj,std::move( rp ) ) ) ;
+		} ) ;
 	}
 
 	template< typename ... T >

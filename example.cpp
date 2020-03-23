@@ -67,7 +67,7 @@ static void _printThreadID()
 
 static void _useResult( const QString& e )
 {
-	Q_UNUSED( e ) ;
+	Q_UNUSED( e )
 }
 
 /*
@@ -238,7 +238,7 @@ static void _testing_multiple_tasks_with_start()
 		void count()
 		{
 			QMutexLocker m( &m_mutex ) ;
-			Q_UNUSED( m ) ;
+			Q_UNUSED( m )
 
 			m_counter++ ;
 
@@ -327,13 +327,33 @@ static void _testing_checking_multiple_futures()
 
 void example::run()
 {
+	auto www = [](int x){
+
+		std::cout << x << ": mm Thread id: " << QThread::currentThreadId() << std::endl ;
+	} ;
+
+	auto mmm = []( const Task::progress& pp ){
+
+		for(int i = 0 ; i < 5 ;i++ ){
+			std::cout << i << ": bg Thread id: " << QThread::currentThreadId() << std::endl ;
+			pp.update( i ) ;
+			QThread::currentThread()->sleep(1);
+		}
+	} ;
+
+	std::cout << "main Thread: " << QThread::currentThreadId() << std::endl ;
+
+	auto& qq = Task::run( this,mmm,www ) ;
+
+	qq.await() ;
+
 	auto aa = []( int x ){ return x ; } ;
 
 	auto bb = [](){	return 6 ; } ;
 
 	auto cc = [](){} ;
 
-	auto dd = []( int x ){ if(x){} ; } ;
+	auto dd = []( int x ){ if(x){} } ;
 
 	std::function< int(int) > aaa = aa ;
 
