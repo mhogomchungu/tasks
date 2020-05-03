@@ -325,23 +325,108 @@ static void _testing_checking_multiple_futures()
 	_print( "Number of future managed: " + QString::number( z.size() ).toStdString() ) ;
 }
 
+struct wait{
+
+	void task_finished( const char * s )
+	{
+		QMutexLocker m( &mutex ) ;
+
+		counter++ ;
+
+		std::cout << s << std::endl ;
+
+		if( counter == 3 ){
+
+			loop.exit() ;
+		}
+	}
+	int counter = 0 ;
+	QMutex mutex ;
+	QEventLoop loop ;
+};
+
+static void _test_when_any1()
+{
+	_print( "Testing when_any" ) ;
+
+	wait w ;
+
+	auto ll1 = [ & ](){
+
+		QThread::currentThread()->sleep( 5 ) ;
+		w.task_finished( "aaa" ) ;
+	} ;
+
+	auto ll2 = [ & ](){
+
+		QThread::currentThread()->sleep( 2 ) ;
+		w.task_finished( "bbb" ) ;
+	} ;
+
+	auto ll3 = [ & ](){
+
+		QThread::currentThread()->sleep( 3 ) ;
+		w.task_finished( "ccc" ) ;
+	} ;
+
+	Task::run( ll1,ll2,ll3 ).when_any( [](){
+
+		_print( "when_any called" ) ;
+	} ) ;
+
+	w.loop.exec() ;
+
+	_print( "Done testing when_any" ) ;
+}
+
+static void _test_when_any2()
+{
+	_print( "Testing when_any with result" ) ;
+
+	wait w ;
+
+	auto fn1 = [ & ](){
+
+		QThread::currentThread()->sleep( 5 ) ;
+		w.task_finished( "aaa" ) ;
+		return 0 ;
+	} ;
+
+	auto fn2 = [ & ](){
+
+		QThread::currentThread()->sleep( 2 ) ;
+		w.task_finished( "bbb" ) ;
+		return 0 ;
+	} ;
+
+	auto fn3 = [ & ](){
+
+		QThread::currentThread()->sleep( 3 ) ;
+		w.task_finished( "ccc" ) ;
+		return 0 ;
+	} ;
+
+	auto ff = [](int){};
+
+	Task::future<int>& s = Task::run( Task::make_pair( fn1,ff ),
+					  Task::make_pair( fn2,ff ),
+					  Task::make_pair( fn3,ff ) ) ;
+
+	s.when_any( [](){
+
+		_print( "when_any called" ) ;
+	} ) ;
+
+	w.loop.exec() ;
+
+	_print( "Done testing when_any with result" ) ;
+}
+
 void example::run()
 {
-	_print( "Testing when_all using lambda" ) ;
+	_test_when_any1() ;
 
-	auto l1 = [](){ std::cout << "aaa" << std::endl ; } ;
-	auto l2 = [](){ std::cout << "bbb" << std::endl ; } ;
-	auto l3 = [](){ std::cout << "ccc" << std::endl ; } ;
-
-	Task::run( l1,l2,l3 ).when_all() ;
-
-	_print( "Testing when_all using futures" ) ;
-
-	auto& f1 = Task::run( [](){ std::cout << "eee" << std::endl ; } ) ;
-	auto& f2 = Task::run( [](){ std::cout << "vvv" << std::endl ; } ) ;
-	auto& f3 = Task::run( [](){ std::cout << "ggg" << std::endl ; } ) ;
-
-	Task::run( f1,f2,f3 ).when_seq() ;
+	_test_when_any2() ;
 
 	auto run_main = []( int x ){
 

@@ -212,6 +212,15 @@ namespace Task
 		{
 			this->queue( std::move( function ) ) ;
 		}
+		void when_any( std::function< void() > function = [](){} )
+		{
+			if( this->manages_multiple_futures() ){
+
+				this->_when_any( std::move( function ) ) ;
+			}else{
+				this->then( std::move( function ) ) ;
+			}
+		}
 		T get()
 		{
 			if( this->manages_multiple_futures() ){
@@ -324,6 +333,39 @@ namespace Task
 					  Task::future< E >&,
 					  std::function< void( E ) >&& ) ;
 	private:
+		void _when_any( std::function< void() > function = [](){} )
+		{
+			m_when_any_function = std::move( function ) ;
+
+			for( auto& it : m_tasks ){
+
+				it.first->then( [ & ]( T&& e ){
+
+					QMutexLocker m( &m_mutex ) ;
+
+					m_counter++ ;
+
+					if( m_task_not_run ){
+
+						m_task_not_run = false ;
+
+						m.unlock() ;
+
+						it.second( std::forward<T>( e ) ) ;
+
+						m_when_any_function() ;
+					}else{
+						m.unlock() ;
+						it.second( std::forward<T>( e ) ) ;
+					}
+
+					if( m_counter == m_tasks.size() ){
+
+						this->deleteLater() ;
+					}
+				} ) ;
+			}
+		}
 		void _queue()
 		{
 			m_tasks[ m_counter ].first->then( [ this ]( T&& e ){
@@ -379,11 +421,13 @@ namespace Task
 		std::function< void() > m_start       = [](){} ;
 		std::function< void() > m_cancel      = [](){} ;
 		std::function< T() > m_get            = [](){ return T() ; } ;
+		std::function< void() > m_when_any_function ;
 
 		QMutex m_mutex ;
 		std::vector< std::pair< Task::future< T > *,std::function< void( T ) > > > m_tasks ;
 		std::vector< QThread * > m_threads ;
 		decltype( m_tasks.size() ) m_counter = 0 ;
+		bool m_task_not_run = true ;
 	};
 
 	template<>
@@ -402,6 +446,15 @@ namespace Task
 				m_function = std::move( function ) ;
 
 				this->_queue() ;
+			}else{
+				this->then( std::move( function ) ) ;
+			}
+		}
+		void when_any( std::function< void() > function = [](){} )
+		{
+			if( this->manages_multiple_futures() ){
+
+				this->_when_any( std::move( function ) ) ;
 			}else{
 				this->then( std::move( function ) ) ;
 			}
@@ -517,6 +570,39 @@ namespace Task
 			m_function() ;
 		}
 	private:
+		void _when_any( std::function< void() > function )
+		{
+			m_when_any_function = std::move( function ) ;
+
+			for( auto& it : m_tasks ){
+
+				it.first->then( [ & ](){
+
+					QMutexLocker m( &m_mutex ) ;
+
+					m_counter++ ;
+
+					if( m_task_not_run ){
+
+						m_task_not_run = false ;
+
+						m.unlock() ;
+
+						it.second() ;
+
+						m_when_any_function() ;
+					}else{
+						m.unlock() ;
+						it.second() ;
+					}
+
+					if( m_counter == m_tasks.size() ){
+
+						this->deleteLater() ;
+					}
+				} ) ;
+			}
+		}
 		void _queue()
 		{
 			m_tasks[ m_counter ].first->then( [ this ](){
@@ -566,11 +652,12 @@ namespace Task
 		std::function< void() > m_start    = [](){} ;
 		std::function< void() > m_cancel   = [](){} ;
 		std::function< void() > m_get      = [](){} ;
-
+		std::function< void() > m_when_any_function ;
 		QMutex m_mutex ;
 		std::vector< std::pair< Task::future< void > *,std::function< void() > > > m_tasks ;
 		std::vector< QThread * > m_threads ;
 		decltype( m_tasks.size() ) m_counter = 0 ;
+		bool m_task_not_run = true ;
 	};
 
 	template< typename T >
