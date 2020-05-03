@@ -201,6 +201,17 @@ namespace Task
 				this->then( std::move( function ) ) ;
 			}
 		}
+		/*
+		 * Below two API just exposes existing functionality using more standard names
+		 */
+		void when_all( std::function< void() > function = [](){} )
+		{
+			this->then( std::move( function ) ) ;
+		}
+		void when_seq( std::function< void() > function = [](){} )
+		{
+			this->queue( std::move( function ) ) ;
+		}
 		T get()
 		{
 			if( this->manages_multiple_futures() ){
@@ -384,6 +395,28 @@ namespace Task
 			m_function = std::move( function ) ;
 			this->start() ;
 		}
+		void queue( std::function< void() > function = [](){} )
+		{
+			if( this->manages_multiple_futures() ){
+
+				m_function = std::move( function ) ;
+
+				this->_queue() ;
+			}else{
+				this->then( std::move( function ) ) ;
+			}
+		}
+		/*
+		 * Below two API just exposes existing functionality using more standard names
+		 */
+		void when_all( std::function< void() > function = [](){} )
+		{
+			this->then( std::move( function ) ) ;
+		}
+		void when_seq( std::function< void() > function = [](){} )
+		{
+			this->queue( std::move( function ) ) ;
+		}
 		void get()
 		{
 			if( this->manages_multiple_futures() ){
@@ -446,17 +479,6 @@ namespace Task
 				this->deleteLater() ;
 			}else{
 				m_cancel() ;
-			}
-		}
-		void queue( std::function< void() > function = [](){} )
-		{
-			if( this->manages_multiple_futures() ){
-
-				m_function = std::move( function ) ;
-
-				this->_queue() ;
-			}else{
-				this->then( std::move( function ) ) ;
 			}
 		}
 		future() = default ;
@@ -775,12 +797,6 @@ namespace Task
 		auto& e = Task::detail::future< E >() ;
 		Task::detail::add_pair( e,std::move( s ),std::move( t ) ... ) ;
 		return e ;
-	}
-
-	template< typename ... Args >
-	Task::future< void >& when_all( Args&& ... args )
-	{
-		return Task::run( std::forward< Args >( args ) ... ) ;
 	}
 
 	/*

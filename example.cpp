@@ -333,7 +333,7 @@ void example::run()
 	auto l2 = [](){ std::cout << "bbb" << std::endl ; } ;
 	auto l3 = [](){ std::cout << "ccc" << std::endl ; } ;
 
-	Task::when_all( l1,l2,l3 ).await() ;
+	Task::run( l1,l2,l3 ).when_all() ;
 
 	_print( "Testing when_all using futures" ) ;
 
@@ -341,7 +341,7 @@ void example::run()
 	auto& f2 = Task::run( [](){ std::cout << "vvv" << std::endl ; } ) ;
 	auto& f3 = Task::run( [](){ std::cout << "ggg" << std::endl ; } ) ;
 
-	Task::when_all( f1,f2,f3 ).await() ;
+	Task::run( f1,f2,f3 ).when_seq() ;
 
 	auto run_main = []( int x ){
 
