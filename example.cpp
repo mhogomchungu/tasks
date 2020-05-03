@@ -327,6 +327,22 @@ static void _testing_checking_multiple_futures()
 
 void example::run()
 {
+	_print( "Testing when_all using lambda" ) ;
+
+	auto l1 = [](){ std::cout << "aaa" << std::endl ; } ;
+	auto l2 = [](){ std::cout << "bbb" << std::endl ; } ;
+	auto l3 = [](){ std::cout << "ccc" << std::endl ; } ;
+
+	Task::when_all( l1,l2,l3 ).await() ;
+
+	_print( "Testing when_all using futures" ) ;
+
+	auto& f1 = Task::run( [](){ std::cout << "eee" << std::endl ; } ) ;
+	auto& f2 = Task::run( [](){ std::cout << "vvv" << std::endl ; } ) ;
+	auto& f3 = Task::run( [](){ std::cout << "ggg" << std::endl ; } ) ;
+
+	Task::when_all( f1,f2,f3 ).await() ;
+
 	auto run_main = []( int x ){
 
 		std::cout << x << ": mm Thread id: " << QThread::currentThreadId() << std::endl ;

@@ -777,6 +777,12 @@ namespace Task
 		return e ;
 	}
 
+	template< typename ... Args >
+	Task::future< void >& when_all( Args&& ... args )
+	{
+		return Task::run( std::forward< Args >( args ) ... ) ;
+	}
+
 	/*
 	 *
 	 * A few useful helper functions
