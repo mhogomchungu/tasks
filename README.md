@@ -206,7 +206,7 @@ auto run_bg = []( const Task::progress& progress ){
    * lambda will be called with the object that was
    * passed to the first lambda.
    */
-Task::future<void>& e = Task::run( this,run_bg,run_main ).await() ;
+Task::future<void>& e = Task::run( this,run_bg,run_main ) ;
 ```
 
 Further documentation of how to use the library is here[1].
