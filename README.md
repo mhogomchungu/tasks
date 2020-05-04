@@ -54,6 +54,15 @@ can be retrieved through the future's below public methods:
 8. .manages_multiple_futures(). This method can be used to check if a future powers
                                 its own task or manages other futures.
 
+9. .when_all(). This method is an alias to .then(). The registered continuation is called when all managed tasks are done
+                          and managed tasks run concurrently.
+
+10. .when_seq(). This method is an alias to .queue(). The registered continuation is called when all managed task are done
+                             and managed tasks run sequentially.
+
+11. .when_any(). This method runs the registered continuation when the first task among managed tasks finish running.
+                               Managed tasks run concurrently.
+
 Examples of using a future.
 ========
 
