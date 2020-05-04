@@ -178,9 +178,34 @@ void cbar( int ) ; //continuation function prototype
 
 Task::future<int>& e = Task::run( Task::make_pair( foo,cfoo ),Task::make_pair( bar,cbar ) ) ;
 ```
+**6. Creating a future that takes two lambdas and run the first one in a background thread and the second one in a user specified thread and manage progress report from the first lambda to the second.
+```c++
 
-Further documentation of how to use the library is here[1] and here[2].
+auto run_main = []( QVariant progress ){
+
+	std::cout << progress.value<int>() ;
+} ;
+
+auto run_bg = []( const Task::progress& progress ){
+
+	for( int i = 0 ; i < 5 ;i++ ){
+		progress.update( i ) ;
+		QThread::currentThread()->sleep(1); //Simulate long running process
+	}
+} ;
+
+/*
+   * This method takes 3 arguments:
+   * The first argument is a pointer to QObject.
+   * The second argument is a lambda that will run in a background thread.
+   * The third argument is a lambda that will run in a thread that owns the object pass in as the first argument.
+   *
+   * Everytime Task::progress::update() is called by the first lambda, the second lambda will be called with the object that was
+   * passed to the first lambda.
+   */
+Task::future<void>& e = Task::run( this,run_bg,run_main ).await() ;
+```
+
+Further documentation of how to use the library is here[1].
 
 [1] https://github.com/mhogomchungu/tasks/blob/master/example.cpp
-
-[2] https://github.com/mhogomchungu/tasks/blob/0bd4fd227aa4f13bba25dff74df06719ada6317d/task.h#L598

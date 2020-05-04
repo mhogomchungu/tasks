@@ -408,14 +408,14 @@ void example::run()
 
 	_test_when_any2() ;
 
-	auto run_main = []( int x ){
+	auto run_main = []( QVariant x ){
 
-		std::cout << x << ": mm Thread id: " << QThread::currentThreadId() << std::endl ;
+		std::cout << x.value<int>() << ": mm Thread id: " << QThread::currentThreadId() << std::endl ;
 	} ;
 
 	auto run_bg = []( const Task::progress& pp ){
 
-		for( int i = 0 ; i < 5 ;i++ ){
+		for( int i = 0 ; i < 2 ;i++ ){
 			std::cout << i << ": bg Thread id: " << QThread::currentThreadId() << std::endl ;
 			pp.update( i ) ;
 			QThread::currentThread()->sleep(1);
@@ -424,7 +424,11 @@ void example::run()
 
 	std::cout << "main Thread: " << QThread::currentThreadId() << std::endl ;
 
-	Task::run( this,run_bg,run_main ).await() ;
+	Task::future<void>& abc = Task::run( this,run_bg,run_main ) ;
+
+	abc.await() ;
+
+	return QCoreApplication::quit();
 
 	auto aa = []( int x ){ return x ; } ;
 

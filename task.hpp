@@ -40,6 +40,7 @@
 #include <QEventLoop>
 #include <QMutex>
 #include <QProcess>
+#include <QVariant>
 
 /*
  *
@@ -808,19 +809,11 @@ namespace Task
 		template< typename function >
 		progress( QObject * obj,function fn )
 		{
-			connect( this,&progress::setProgress,obj,std::move( fn ) ) ;
-		}
-		void update( int x ) const
-		{
-			const_cast< progress * >( this )->update( x ) ;
+			connect( this,&progress::update,obj,std::move( fn ) ) ;
 		}
 	signals:
-		void setProgress( int ) ;
+		void update( QVariant x ) const ;
 	private:
-		void update( int x )
-		{
-			emit setProgress( x ) ;
-		}
 	};
 
 	template< typename Fn,typename cb >
