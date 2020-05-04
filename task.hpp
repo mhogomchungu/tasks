@@ -146,29 +146,7 @@ namespace Task
 	pair< void > make_pair( E e,F f )
 	{
 		return pair< void >( std::move( e ),std::move( f ) ) ;
-	}
-
-	class Thread : public QThread
-	{
-		Q_OBJECT
-	public:
-		Thread()
-		{
-			#if QT_VERSION < QT_VERSION_CHECK( 5,0,0 )
-				connect( this,SIGNAL( finished() ),this,SLOT( deleteLater() ) ) ;
-			#else
-				connect( this,&QThread::finished,this,&QThread::deleteLater ) ;
-			#endif
-		}
-	protected:
-		virtual ~Thread()
-		{
-		}
-	private:
-		virtual void run()
-		{
-		}
-	};
+	}	
 
 	template< typename T >
 	class future : private QObject
@@ -660,71 +638,71 @@ namespace Task
 		bool m_task_not_run = true ;
 	};
 
-	template< typename T >
-	class ThreadHelper : public Thread
-	{
-	public:
-		ThreadHelper( std::function< T() >&& function ) :
-			m_function( std::move( function ) ),
-			m_future( this,
-				  [ this ](){ this->start() ; },
-				  [ this ](){ this->deleteLater() ; },
-				  [ this ](){ this->deleteLater() ; return m_function() ; } )
-		{
-		}
-		future<T>& Future()
-		{
-			return m_future ;
-		}
-	private:
-		~ThreadHelper()
-		{
-			m_future.run( std::move( m_result ) ) ;
-		}
-		void run()
-		{
-			m_result = m_function() ;
-		}
-		std::function< T() > m_function ;
-		future<T> m_future ;
-		T m_result ;
-	};
-
-	template<>
-	class ThreadHelper< void > : public Thread
-	{
-	public:
-		ThreadHelper( std::function< void() >&& function ) :
-			m_function( std::move( function ) ),
-			m_future( this,
-				  [ this ](){ this->start() ; },
-				  [ this ](){ this->deleteLater() ; },
-				  [ this ](){ m_function() ; this->deleteLater() ; } )
-		{
-		}
-		future< void >& Future()
-		{
-			return m_future ;
-		}
-	private:
-		~ThreadHelper()
-		{
-			m_future.run() ;
-		}
-		void run()
-		{
-			m_function() ;
-		}
-		std::function< void() > m_function ;
-		future< void > m_future ;
-	};
-
-	/*
-	 * -------------------------Start of internal helper functions-------------------------
-	 */
-
 	namespace detail
 	{
+		/*
+		 * -------------------------Start of internal helper functions-------------------------
+		 */
+		template< typename T >
+		class ThreadHelper : public QThread
+		{
+		public:
+			ThreadHelper( std::function< T() >&& function ) :
+				m_function( std::move( function ) ),
+				m_future( this,
+					  [ this ](){ this->start() ; },
+					  [ this ](){ this->deleteLater() ; },
+					  [ this ](){ this->deleteLater() ; return m_function() ; } )
+			{
+				connect( this,&QThread::finished,this,&QThread::deleteLater ) ;
+			}
+			future<T>& Future()
+			{
+				return m_future ;
+			}
+		private:
+			~ThreadHelper()
+			{
+				m_future.run( std::move( m_result ) ) ;
+			}
+			void run()
+			{
+				m_result = m_function() ;
+			}
+			std::function< T() > m_function ;
+			future<T> m_future ;
+			T m_result ;
+		};
+
+		template<>
+		class ThreadHelper< void > : public QThread
+		{
+		public:
+			ThreadHelper( std::function< void() >&& function ) :
+				m_function( std::move( function ) ),
+				m_future( this,
+					  [ this ](){ this->start() ; },
+					  [ this ](){ this->deleteLater() ; },
+					  [ this ](){ m_function() ; this->deleteLater() ; } )
+			{
+				connect( this,&QThread::finished,this,&QThread::deleteLater ) ;
+			}
+			future< void >& Future()
+			{
+				return m_future ;
+			}
+		private:
+			~ThreadHelper()
+			{
+				m_future.run() ;
+			}
+			void run()
+			{
+				m_function() ;
+			}
+			std::function< void() > m_function ;
+			future< void > m_future ;
+		};
 		template< typename Fn >
 		Task::future<typename std::result_of<Fn()>::type>& run( Fn function )
 		{

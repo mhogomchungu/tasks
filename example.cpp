@@ -50,6 +50,27 @@ static void _print( const T& e )
 	std::cout << e << std::endl ;
 }
 
+struct wait{
+
+	void task_finished( const char * s )
+	{
+		QMutexLocker m( &mutex ) ;
+
+		counter++ ;
+
+		std::cout << s << std::endl ;
+
+		if( counter == max ){
+
+			loop.exit() ;
+		}
+	}
+	int max = 3 ;
+	int counter = 0 ;
+	QMutex mutex ;
+	QEventLoop loop ;
+};
+
 void example::start()
 {
 	QMetaObject::invokeMethod( this,"run",Qt::QueuedConnection ) ;
@@ -228,46 +249,25 @@ static void _testing_multiple_tasks_with_start()
 {
 	std::cout<< "Testing multiple tasks with continuation arguments using start" << std::endl ;
 
-	class counter : public QObject
-	{
-	public:
-		counter( int s,QObject * e ) : QObject( e ),m_max( s )
-		{
-		}
-
-		void count()
-		{
-			QMutexLocker m( &m_mutex ) ;
-			Q_UNUSED( m )
-
-			m_counter++ ;
-
-			if( m_counter == m_max ){
-
-				QCoreApplication::quit() ;
-			}
-		}
-	private:
-		int m_max ;
-		int m_counter = 0 ;
-		QMutex m_mutex ;
-	};
-
-	auto e = new counter( 3,QCoreApplication::instance() ) ;
+	wait w ;
 
 	auto fn1 = [](){ _printThreadID() ; return 0 ; } ;
 	auto fn2 = [](){ _printThreadID() ; return 0 ; } ;
 	auto fn3 = [](){ _printThreadID() ; return 0 ; } ;
 
-	auto r1 = [ = ]( int ){ _print( "r1" ) ; e->count() ; } ;
-	auto r2 = [ = ]( int ){ _print( "r2" ) ; e->count() ; } ;
-	auto r3 = [ = ]( int ){ _print( "r3" ) ; e->count() ; } ;
+	auto r1 = [ & ]( int ){ w.task_finished( "r1" ) ; } ;
+	auto r2 = [ & ]( int ){ w.task_finished( "r2" ) ; } ;
+	auto r3 = [ & ]( int ){ w.task_finished( "r3" ) ; } ;
 
 	Task::future<int>& s = Task::run( Task::make_pair( fn1,r1 ),
 					  Task::make_pair( fn2,r2 ),
 					  Task::make_pair( fn3,r3 ) ) ;
 
 	s.start() ;
+
+	w.loop.exec() ;
+
+	QCoreApplication::quit() ;
 }
 
 static void _testing_queue_with_no_results()
@@ -324,26 +324,6 @@ static void _testing_checking_multiple_futures()
 	_print( "A future managed multiple futures: " + s ) ;
 	_print( "Number of future managed: " + QString::number( z.size() ).toStdString() ) ;
 }
-
-struct wait{
-
-	void task_finished( const char * s )
-	{
-		QMutexLocker m( &mutex ) ;
-
-		counter++ ;
-
-		std::cout << s << std::endl ;
-
-		if( counter == 3 ){
-
-			loop.exit() ;
-		}
-	}
-	int counter = 0 ;
-	QMutex mutex ;
-	QEventLoop loop ;
-};
 
 static void _test_when_any1()
 {
