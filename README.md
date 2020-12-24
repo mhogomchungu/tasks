@@ -148,7 +148,7 @@ void foo() ; //function prototype
 void bar() ; //function prototype
 void woof() ; //function prototype
 
-Task::future<void>& foo = Task::run( foo,bar,woof ) ;
+Task::future<void>& foo = Task::run_tasks( foo,bar,woof ) ;
 
 ```
 

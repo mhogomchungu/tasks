@@ -178,7 +178,7 @@ static void _testing_task_future_all()
 
 	_print( "Testing Task::run().await() multiple tasks" ) ;
 
-	Task::future<void>& e = Task::run( fn1,fn2,fn3 ) ;
+	Task::future<void>& e = Task::run_tasks( fn1,fn2,fn3 ) ;
 
 	e.await() ;
 
@@ -188,7 +188,7 @@ static void _testing_task_future_all()
 	Task::future<void>& f2 = Task::run( fn2 ) ;
 	Task::future<void>& f3 = Task::run( fn3 ) ;
 
-	Task::future<void>& s = Task::run( f1,f2,f3 ) ;
+	Task::future<void>& s = Task::run_tasks( f1,f2,f3 ) ;
 
 	s.then( [](){
 
@@ -210,6 +210,41 @@ static void _testing_task_future_all()
  * 6. .then() can be called on the future to register an event to be called when all
  *    tasks and their continuations finish.
  */
+static void _testing_multiple_tasks_non_movable()
+{
+	_print( "Testing multiple tasks without continuation arguments" ) ;
+
+	auto fna1 = [ a = std::unique_ptr<int>() ](){ _printThreadID(); } ;
+	auto fna2 = [ a = std::unique_ptr<int>() ](){ _printThreadID(); } ;
+	auto fna3 = [ a = std::unique_ptr<int>() ](){ _printThreadID(); } ;
+
+	auto ra1 = [ a = std::unique_ptr<int>() ](){ _print( "r1" ) ; } ;
+	auto ra2 = [ a = std::unique_ptr<int>() ](){ _print( "r2" ) ; } ;
+	auto ra3 = [ a = std::unique_ptr<int>() ](){ _print( "r3" ) ; } ;
+
+	Task::future<void>& e = Task::run( Task::make_pair( std::move( fna1 ),std::move( ra1 ) ),
+					   Task::make_pair( std::move( fna2 ),std::move( ra2 ) ),
+					   Task::make_pair( std::move( fna3 ),std::move( ra3 ) ) ) ;
+
+	e.await() ;
+
+	_print( "Testing multiple tasks with continuation arguments" ) ;
+
+	auto fn1 = [ a = std::unique_ptr<int>() ](){ _printThreadID() ; return 0 ; } ;
+	auto fn2 = [ a = std::unique_ptr<int>() ](){ _printThreadID() ; return 0 ; } ;
+	auto fn3 = [ a = std::unique_ptr<int>() ](){ _printThreadID() ; return 0 ; } ;
+
+	auto r1 = [ a = std::unique_ptr<int>() ]( int ){ _print( "r1" ) ; } ;
+	auto r2 = [ a = std::unique_ptr<int>() ]( int ){ _print( "r2" ) ; } ;
+	auto r3 = [ a = std::unique_ptr<int>() ]( int ){ _print( "r3" ) ; } ;
+
+	Task::future<int>& s = Task::run( Task::make_pair( std::move( fn1 ),std::move( r1 ) ),
+					  Task::make_pair( std::move( fn2 ),std::move( r2 ) ),
+					  Task::make_pair( std::move( fn3 ),std::move( r3 ) ) ) ;
+
+	s.then( _testing_multiple_tasks_with_start ) ;
+}
+
 static void _testing_multiple_tasks()
 {
 	_print( "Testing multiple tasks without continuation arguments" ) ;
@@ -242,7 +277,7 @@ static void _testing_multiple_tasks()
 					  Task::make_pair( fn2,r2 ),
 					  Task::make_pair( fn3,r3 ) ) ;
 
-	s.then( _testing_multiple_tasks_with_start ) ;
+	s.then( _testing_multiple_tasks_non_movable ) ;
 }
 
 static void _testing_multiple_tasks_with_start()
@@ -315,7 +350,7 @@ static void _testing_checking_multiple_futures()
 
 	_print( "Testing finding out if a future manages multiple futures" ) ;
 
-	Task::future<void>& e = Task::run( fn1,fn2,fn3 ) ;
+	Task::future<void>& e = Task::run_tasks( fn1,fn2,fn3 ) ;
 
 	const auto& z = e.all_threads() ;
 
@@ -349,7 +384,7 @@ static void _test_when_any1()
 		w.task_finished( "ccc" ) ;
 	} ;
 
-	Task::run( ll1,ll2,ll3 ).when_any( [](){
+	Task::run_tasks( ll1,ll2,ll3 ).when_any( [](){
 
 		_print( "when_any called" ) ;
 	} ) ;
@@ -402,8 +437,158 @@ static void _test_when_any2()
 	_print( "Done testing when_any with result" ) ;
 }
 
+static void _test_move_only_callables()
+{
+	Task::run( [ a = std::unique_ptr<int>() ]( int x ){ return x ; },4 ).get() ;
+	Task::run( [ a = std::unique_ptr<int>() ](int){},4 ).get() ;
+
+	Task::run( [ a = std::unique_ptr<int>() ](){ return 6 ; } ).get() ;
+	Task::run( [ a = std::unique_ptr<int>() ](){} ).get() ;
+
+	Task::await( [ a = std::unique_ptr<int>() ](){ return 6 ; } ) ;
+
+	auto& tt = Task::run( [ a = std::unique_ptr<int>() ](){ return 6 ; } ) ;
+
+	Task::await( tt ) ;
+	Task::await( Task::run( [ a = std::unique_ptr<int>() ](){} ) ) ;
+
+	Task::await( [ a = std::unique_ptr<int>() ]( int x ){ return x ; },4 ) ;
+
+	Task::await( [ a = std::unique_ptr<int>() ](int){},4 ) ;
+
+	Task::await( [ a = std::unique_ptr<int>() ](){ return 6 ; } ) ;
+
+	Task::await( [ a = std::unique_ptr<int>() ](){} ) ;
+
+	auto& zz = Task::run( [ a = std::unique_ptr<int>() ](){ return 6 ; } ) ;
+
+	Task::await( zz ) ;
+	Task::await( Task::run( [ a = std::unique_ptr<int>() ](){} ) ) ;
+
+	Task::exec( [ a = std::unique_ptr<int>() ]( int x ){ return x ; },4 ) ;
+	Task::exec( [ a = std::unique_ptr<int>() ](int){},4 ) ;
+
+	Task::exec( [ a = std::unique_ptr<int>() ](){ return 6 ; } ) ;
+	Task::exec( [ a = std::unique_ptr<int>() ](){} ) ;
+
+	Task::run_tasks( [ a = std::unique_ptr<int>() ](){ return 6 ; },
+			 [ a = std::unique_ptr<int>() ](){ return 6 ; },
+			 [ a = std::unique_ptr<int>() ](){ return 6 ; },
+			 [ a = std::unique_ptr<int>() ](){ return 6 ; } ).get() ;
+
+	Task::run_tasks( [](){ return 6 ; },
+			 [](){ return 6 ; },
+			 [](){ return 6 ; },
+			 [](){ return 6 ; } ).get() ;
+
+	Task::run_tasks( Task::run( [ a = std::unique_ptr<int>() ](){} ),
+			 Task::run( [ a = std::unique_ptr<int>() ](){} ),
+			 Task::run( [ a = std::unique_ptr<int>() ](){} ) ).get() ;
+}
+
+static void _test_copyable_callables()
+{
+	auto aa = []( int x ){ return x ; } ;
+
+	auto bb = [](){	return 6 ; } ;
+
+	auto cc = [](){} ;
+
+	auto dd = [](int){} ;
+
+	Task::run( aa,4 ).get() ;
+	Task::run( dd,4 ).get() ;
+
+	Task::run( bb ).get() ;
+	Task::run( cc ).get() ;
+
+	Task::await( bb ) ;
+
+	auto& tt = Task::run( bb ) ;
+
+	Task::await( tt ) ;
+	Task::await( Task::run( cc ) ) ;
+
+	Task::await( aa,4 ) ;
+
+	Task::await( dd,4 ) ;
+
+	Task::await( bb ) ;
+
+	Task::await( cc ) ;
+
+	auto& zz = Task::run( bb ) ;
+
+	Task::await( zz ) ;
+	Task::await( Task::run( cc ) ) ;
+
+	Task::exec( aa,4 ) ;
+	Task::exec( dd,4 ) ;
+
+	Task::exec( bb ) ;
+	Task::exec( cc ) ;
+
+	Task::run_tasks( bb,bb,cc ).get() ;
+
+	Task::run_tasks( Task::run( cc ),Task::run( cc ) ).get() ;
+}
+
+struct foo
+{
+	foo()
+	{
+	}
+	foo(int a)
+	{
+		_print(a);
+	}
+	std::unique_ptr<int> m ;
+};
+
+struct www
+{
+	void operator()()
+	{
+
+	}
+	www( const www& )
+	{
+		_print( "const www&" ) ;
+	}
+	www( www&& )
+	{
+		_print( "www&&" ) ;
+	}
+	www()
+	{
+		_print( "www()" ) ;
+	}
+	www& operator=( const www& )
+	{
+		_print( "www& operator=( const www& )" ) ;
+
+		return *this ;
+	}
+	www& operator=( www&& )
+	{
+		_print( "www& operator=( www&& )" ) ;
+
+		return *this ;
+	}
+
+	std::unique_ptr<int> m ;
+};
+
 void example::run()
 {
+#if __cplusplus >= 201703L
+
+	Task::await([](foo,foo,foo){},foo(7),foo(7),foo(7));
+#endif
+	_test_copyable_callables() ;
+
+	_test_move_only_callables() ;
+
 	_test_when_any1() ;
 
 	_test_when_any2() ;
@@ -427,59 +612,6 @@ void example::run()
 	Task::future<void>& abc = Task::run( this,run_bg,run_main ) ;
 
 	abc.await() ;
-
-	return QCoreApplication::quit();
-
-	auto aa = []( int x ){ return x ; } ;
-
-	auto bb = [](){	return 6 ; } ;
-
-	auto cc = [](){} ;
-
-	auto dd = []( int x ){ if(x){} } ;
-
-	std::function< int(int) > aaa = aa ;
-
-	Task::run( aaa,4 ).get() ;
-	Task::run( aa,4 ).get() ;
-	Task::run( dd,4 ).get() ;
-
-	Task::run( bb ).get() ;
-	Task::run( cc ).get() ;
-
-	Task::await( bb ) ;
-	Task::await( bb ) ;
-
-	auto& tt = Task::run( bb ) ;
-
-	Task::await( tt ) ;
-	Task::await( Task::run( cc ) ) ;
-
-	Task::await( aa,4 ) ;
-
-	Task::await( dd,4 ) ;
-
-	Task::await( bb ) ;
-
-	Task::await( cc ) ;
-
-	auto& zz = Task::run( bb ) ;
-
-	Task::await( zz ) ;
-	Task::await( Task::run( cc ) ) ;
-
-	Task::exec( aaa,4 );
-	Task::exec( aa,4 ) ;
-	Task::exec( dd,4 ) ;
-
-	Task::exec( bb ) ;
-	Task::exec( cc ) ;
-
-	Task::run( bb,bb ).get() ;
-
-	Task::run( Task::run( cc ),Task::run( cc ) ).get() ;
-
-	_print( Task::process::run( "ls" ).await().std_out().constData() ) ;
 
 	_testing_checking_multiple_futures() ;
 

@@ -5,9 +5,16 @@ project( tasks )
 set( LIB_VERSION "1.2.6" )
 set( SO_VERSION "2.0.0" )
 
-add_definitions( -Wextra -Wall -pedantic )
+add_definitions( -Wextra -Wall -pedantic)
 
-set( CMAKE_CXX_STANDARD 14 )
+if( CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 10.0.0)
+        set( CMAKE_CXX_STANDARD 14 )
+	MESSAGE( STATUS "Setting C++ version to C++20" )
+else()
+	set( CMAKE_CXX_STANDARD 14 )
+	MESSAGE( STATUS "Setting C++ version to C++14" )
+endif()
+
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS OFF)
 
