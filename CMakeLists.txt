@@ -1,11 +1,15 @@
 cmake_minimum_required( VERSION 3.0 )
 
-project( tasks )
+project( tasks LANGUAGES CXX )
 
 set( LIB_VERSION "1.2.6" )
 set( SO_VERSION "2.0.0" )
 
-add_definitions( -Wextra -Wall -pedantic)
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+
+else()
+    add_definitions(-Wall -Wextra -pedantic)
+endif()
 
 if( CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 10.0.0)
         set( CMAKE_CXX_STANDARD 20 )
@@ -38,10 +42,14 @@ endif()
 
 target_link_libraries( mhogomchungu_task ${Qt5Core_LIBRARIES} )
 
-if( WIN32 )
-	set_target_properties( mhogomchungu_task PROPERTIES COMPILE_FLAGS "-Wextra -Wall -s -pedantic " )
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+
 else()
-	set_target_properties( mhogomchungu_task PROPERTIES COMPILE_FLAGS "-Wextra -Wall -s -fPIC -pedantic " )
+    if( WIN32 )
+            set_target_properties( mhogomchungu_task PROPERTIES COMPILE_FLAGS "-Wextra -Wall -s -pedantic " )
+    else()
+            set_target_properties( mhogomchungu_task PROPERTIES COMPILE_FLAGS "-Wextra -Wall -s -fPIC -pedantic " )
+    endif()
 endif()
 
 if( DEBUG )
