@@ -144,7 +144,7 @@ namespace Task
 		using result_of = std::invoke_result_t<Function,Args ...> ;
 #else
 		template<typename Function,typename ... Args>
-		using result_of = std::result_of_t<Function( Args ... )> ;
+		using result_of = std::result_of_t<Function(Args ...)> ;
 #endif
 		template<typename Function>
 		using copyable = std::enable_if_t<std::is_copy_constructible<Function>::value,int> ;
@@ -152,17 +152,29 @@ namespace Task
 		template<typename Function>
 		using not_copyable = std::enable_if_t<!std::is_copy_constructible<Function>::value,int> ;
 
-		template<typename Function,typename Args>
-		using has_argument = std::enable_if_t<std::is_void<result_of<Function,Args>>::value,int> ;
+		template<typename ReturnType,typename Function,typename ... Args>
+		using has_same_return_type = std::enable_if_t<std::is_same<result_of<Function,Args...>,ReturnType>::value,int> ;
+
+		template<typename Function,typename ... Args>
+		using has_void_return_type = has_same_return_type<void,Function,Args...> ;
+
+		template<typename Function,typename ... Args>
+		using has_bool_return_type = has_same_return_type<bool,Function,Args...> ;
+
+		template<typename Function,typename ... Args>
+		using has_non_void_return_type = std::enable_if_t<!std::is_void<result_of<Function,Args...>>::value,int> ;
+
+		template<typename Function,typename ... Args>
+		using has_argument = has_same_return_type<result_of<Function,Args...>,Function,Args...> ;
 
 		template<typename Function>
-		using has_no_argument = std::enable_if_t<std::is_void<result_of<Function>>::value,int> ;
+		using has_no_argument = has_same_return_type<result_of<Function>,Function> ;
 
-		template<typename Function>
-		using returns_void = std::enable_if_t<std::is_void<Task::detail::result_of<Function>>::value,int > ;
+		template<typename Function,typename ... Args>
+		using returns_void = has_void_return_type<Function,Args...> ;
 
-		template<typename Function>
-		using returns_value = std::enable_if_t<!std::is_void<Task::detail::result_of<Function>>::value,int > ;
+		template<typename Function,typename ... Args>
+		using returns_value = has_non_void_return_type<Function,Args...> ;
 	}
 
 	template< typename T >
@@ -181,7 +193,7 @@ namespace Task
 		{
 		}
 		std::pair< std::function< void() >,std::function< void() > > value ;
-	};	
+	};
 	template< typename E,
 		  typename F,
 		  Task::detail::not_copyable<E> = 0,
@@ -873,7 +885,7 @@ namespace Task
 			{
 				connect( this,&QThread::finished,this,&QThread::deleteLater ) ;
 			}
-			future<Type>& Future()
+			Task::future<Type>& Future()
 			{
 				return m_future ;
 			}
@@ -887,7 +899,7 @@ namespace Task
 				m_result = m_function() ;
 			}
 			Function m_function ;
-			future<Type> m_future ;
+			Task::future<Type> m_future ;
 			Type m_result ;
 		};
 
@@ -904,7 +916,7 @@ namespace Task
 			{
 				connect( this,&QThread::finished,this,&QThread::deleteLater ) ;
 			}
-			future< void >& Future()
+			Task::future< void >& Future()
 			{
 				return m_future ;
 			}
@@ -918,7 +930,7 @@ namespace Task
 				m_function() ;
 			}
 			Function m_function ;
-			future< void > m_future ;
+			Task::future< void > m_future ;
 		};
 		template<typename Fn,Task::detail::returns_value<Fn> = 0>
 		Task::future<Task::detail::result_of<Fn>>& run( Fn function )
